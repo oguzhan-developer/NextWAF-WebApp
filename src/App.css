@@ -1,0 +1,100 @@
+#background {
+  display: flex;
+  height: 100vh;
+  background-color: var(--arkaplan-color);
+  justify-content: center;
+  align-items: center;
+}
+
+#container {
+  border-radius: 18px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  justify-content: space-between;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+
+#figure {
+  width: 600px;
+  border-radius: 18px;
+}
+
+#version {
+  font-size: 1.5rem;
+}
+
+#logo {
+  width: 300px;
+  margin: 0 auto;
+  margin-bottom: 0.3rem;
+  margin-top: -2.1rem;
+}
+
+#baslik,
+#alt_baslik {
+  text-align: center;
+  margin: 0;
+}
+
+#baslik {
+  color: var(--baslik-color);
+  font-size: 3rem;
+  margin-bottom: 0.5rem !important;
+}
+
+#alt_baslik {
+  color: var(--alt-baslik-color);
+  font-size: 2.6rem;
+  margin-bottom: 0.8rem !important;
+}
+
+#top_label {
+  color: var(--alt-baslik-color);
+  margin-left: 2rem;
+  font-size: 1.6rem;
+  margin-bottom: 3rem;
+}
+
+#form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  margin: 1rem 3rem;
+}
+
+#form .label {
+  color: var(--alt-baslik-color) !important;
+  font-weight: bold;
+}
+
+#form .input {
+  font-size: 14px;
+  border-radius: 6px;
+  line-height: 1.5;
+  padding: 5px 10px;
+  transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
+  border: 2px solid #dee1e2;
+  color: rgb(14, 14, 16);
+  background: #ffffff;
+  display: block;
+  height: 36px;
+  outline: none;
+  margin: 0.5rem !important;
+}
+
+#register_btn {
+  color: var(--alt-baslik-color);
+  text-decoration: underline;
+  font-size: 1rem;
+}
+
+#login_btn {
+  background-color: var(--alt-baslik-color);
+  margin-top: .5rem;
+}
+#login_btn:hover, #register_btn:hover{
+  cursor: pointer;
+  opacity: 0.86;
+}

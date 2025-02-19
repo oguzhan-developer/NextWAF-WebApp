@@ -1,0 +1,128 @@
+#background {
+  display: flex;
+  height: 100vh;
+  background-color: var(--arkaplan-color);
+  justify-content: center;
+  align-items: center;
+}
+
+#container {
+  border-radius: 18px;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  justify-content: space-between;
+  text-align: center;
+  display: flex;
+  align-items: center;
+
+}
+
+#figure {
+  width: 600px;
+  border-radius: 18px;
+}
+
+#version {
+  font-size: 1.5rem;
+}
+
+#logo {
+  width: 300px;
+  margin: 0 auto;
+  margin-bottom: 0.3rem;
+  margin-top: -2.1rem;
+}
+
+#baslik,
+#alt_baslik {
+  text-align: center;
+  margin: 0;
+}
+
+#baslik {
+  color: var(--baslik-color);
+  font-size: 3rem;
+  margin-bottom: 0.5rem !important;
+}
+
+#alt_baslik {
+  color: var(--alt-baslik-color);
+  font-size: 1.7rem;
+  margin-bottom: 0.8rem !important;
+}
+
+#top_label_register,
+#top_label_login {
+  color: var(--alt-baslik-color);
+  font-size: 1.6rem;
+  margin-left: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+}
+
+#top_label_login {
+  margin-top: -4.5rem;
+}
+
+#form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  margin: 1rem 3rem;
+  margin-top: 3rem;
+  transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+  opacity: 1;
+  transform: scale(1);
+}
+
+#form.fade-out {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+#form.fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+#form .label {
+  color: var(--alt-baslik-color) !important;
+  font-weight: bold;
+}
+
+#form .input {
+  font-size: 14px;
+  border-radius: 6px;
+  line-height: 1.5;
+  padding: 5px 10px;
+  transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
+  border: 2px solid #dee1e2;
+  color: rgb(14, 14, 16);
+  background: #ffffff;
+  display: block;
+  height: 36px;
+  outline: none;
+  margin: 0.5rem !important;
+}
+
+#sub_btn {
+  color: var(--alt-baslik-color);
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+#sub_btn:hover {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+#login_btn {
+  background-color: var(--alt-baslik-color);
+  margin-top: 1rem;
+}
+
+#login_btn:hover {
+  opacity: 0.85;
+  cursor: pointer;
+}

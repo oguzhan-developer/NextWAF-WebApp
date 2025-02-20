@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import Login from "./pages/Login/Login.jsx"
 import Register from "./pages/Register/Register.jsx"
 import { useEffect } from "react"
+import WAF from "./pages/WAF/WAF.jsx"
 
 function App() {
 
@@ -13,8 +14,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="login" element={<Login />} />
-        <Route path="waf" element={<Login />} />
-
+        <Route path="waf" element={<WAF />} />
         <Route path="register" element={<Register />} />
       </Routes>
     </Router>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './WAF.css'
 import 'semantic-ui-css/semantic.min.css'
 import { getCookieJSON, removeCookie } from '../../utils/cookie';
-import { Image, Dropdown } from 'semantic-ui-react';
+import Menu from '../../components/Menu/Menu';
 
 function WAF() {
     const [username, setUsername] = useState('');
@@ -17,27 +17,10 @@ function WAF() {
         }
     }, []);
 
-    const handleLogout = () => {
-        removeCookie('user');
-        window.location.href = "/login";
-    };
-
-    const trigger = (
-        <span id="user-info">{username}</span>
-    );
-
-    const options = [
-        { key: 'logout', text: 'Çıkış Yap', onClick: handleLogout },
-    ];
-
     return (
         <div id="background">
-            <div id="menu-bar">
-                <div id="menu-content">
-                    <span id="menu-logo"><Image src="/src/assets/logo.png" /></span>
-                    <Dropdown trigger={trigger} options={options} pointing='top right' icon={null} />
-                </div>
-            </div>
+            <Menu />
+            {/* Diğer içerikler */}
         </div>
     );
 }

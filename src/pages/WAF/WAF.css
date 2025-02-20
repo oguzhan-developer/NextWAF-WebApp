@@ -8,8 +8,8 @@
 
 #menu-bar {
     width: 100%;
-    height: 50px;
-    background-color: var(--arkaplan-color-daha-acik);
+    height: 40px;
+    background-color: var(--arkaplan-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,6 +28,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-right: 1rem;
 }
 
 #menu-logo {
@@ -42,4 +43,39 @@
     font-size: 1rem;
     color: var(--alt-baslik-color);
     padding: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+#user-info:hover {
+    color: var(--baslik-color);
+}
+
+#menu-btn{
+    cursor:default;
+    margin: 0;
+}
+
+.ui.menu.inverted {
+    background-color: var(--arkaplan-color-daha-acik) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.ui.menu .item {
+    color: var(--alt-baslik-color) !important;
+   /* left: -10px !important; Açılır menüyü sola kaydır */
+
+}
+
+.ui.dropdown .menu {
+    background-color: var(--arkaplan-color) !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+
+}
+
+.ui.dropdown .menu .item {
+    color: var(--alt-baslik-color) !important;
+
 }

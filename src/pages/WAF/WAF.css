@@ -1,5 +1,6 @@
 #background {
     display: flex;
+    flex-direction: column;
     height: 100vh;
     background-color: var(--arkaplan-color);
     justify-content: center;
@@ -78,4 +79,17 @@
 .ui.dropdown .menu .item {
     color: var(--alt-baslik-color) !important;
 
+}
+
+.content {
+    width: 80%;
+    margin-top: 5rem;
+}
+
+.segment {
+    margin-bottom: 2rem;
+}
+
+.table {
+    margin-top: 1rem;
 }

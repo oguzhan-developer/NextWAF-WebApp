@@ -7,8 +7,11 @@ import WAF from "./pages/WAF/WAF.jsx"
 function App() {
 
   useEffect(() => {
-    document.title = (import.meta.env.VITE_APP_NAME + " - " + import.meta.env.VITE_APP_SUBNAME) || "Gelişmiş Web Güvenlik Duvarı"
-  })
+    document.title = (import.meta.env.VITE_APP_NAME + " - " + import.meta.env.VITE_APP_SUBNAME) || "Gelişmiş Web Güvenlik Duvarı";
+    if (window.location.pathname === "/") {
+      window.location.href = "/login";
+    }
+  }, []);
 
   return (
     <Router>

@@ -35,7 +35,7 @@
 .user-info {
     padding: 1.4rem;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     position: relative;
 }
 .user-info:hover {
@@ -60,13 +60,22 @@
 }
 
 .dropdown-item {
-    padding: 10px 20px;
+    width: 9rem;
+    padding: 10px 15px;
     cursor: pointer;
     color: var(--alt-baslik-color);
     transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item i {
+    margin-right: 10px;
 }
 
 .dropdown-item:hover {
     background-color: var(--arkaplan-color-daha-acik);
     color: var(--baslik-color);
 }
+
+

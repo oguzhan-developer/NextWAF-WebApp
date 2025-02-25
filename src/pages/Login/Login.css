@@ -22,14 +22,14 @@
 }
 
 #version {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
 #logo {
   width: 300px;
   margin: 0 auto;
   margin-bottom: 0.3rem;
-  margin-top: -2.1rem;
+  margin-top: -4.5rem;
 }
 
 #baslik,
@@ -47,7 +47,7 @@
 #alt_baslik {
   color: var(--alt-baslik-color);
   font-size: 1.7rem;
-  margin-bottom: 0.8rem !important;
+  margin-bottom: 1.2rem !important;
 }
 
 #top_label_register,
@@ -99,11 +99,15 @@
   transition: box-shadow 100ms ease-in, border 100ms ease-in, background-color 100ms ease-in;
   border: 2px solid #dee1e2;
   color: rgb(14, 14, 16);
-  background: #ffffff;
+  background: #f6f6f6;
   display: block;
   height: 36px;
   outline: none;
   margin: 0.5rem !important;
+}
+
+#form .input:focus {
+  border: 1.5px solid #acacac;
 }
 
 #sub_btn {
@@ -125,4 +129,18 @@
 #login_btn:hover {
   opacity: 0.85;
   cursor: pointer;
+}
+
+.error-message-container {
+  margin-top: 1rem;
+    height: 2rem; /* Sabit bir yükseklik belirleyin */
+    width: 18rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.message.negative {
+    color: red;
+    text-align: center;
 }

@@ -36,18 +36,24 @@ function Menu() {
     };
 
     return (
-        <div className="modern-menu">
+        <div className="modern-menu ui">
             <div className="menu-logo">
                 <img src="/src/assets/logo.png" alt="Logo" />
             </div>
             <div className="menu-items">
                 <div className="menu-item user-info" onClick={toggleDropdown}>
-                    {username} <i className="angle down icon"></i>
+                    <i className=' user circle icon'></i><strong style={{margin:"0 0.2rem"}}>{username}</strong> <i className=" angle down icon"></i>
                     {dropdownOpen && (
                         <div className="dropdown-content">
-                            <div className="dropdown-item">Profil</div>
-                            <div className="dropdown-item">Ayarlar</div>
-                            <div className="dropdown-item" onClick={handleLogout}>Çıkış Yap</div>
+                            <div className="dropdown-item">
+                                <i className="user icon"></i> Profil
+                            </div>
+                            <div className="dropdown-item">
+                                <i className="settings icon"></i> Ayarlar
+                            </div>
+                            <div className="dropdown-item" onClick={handleLogout}>
+                                <i className="sign-out icon"></i> Çıkış Yap
+                            </div>
                         </div>
                     )}
                 </div>

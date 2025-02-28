@@ -84,8 +84,6 @@
 
 .content {
     width: 90%;
-    margin-top: 22rem;
-    padding-bottom: 2rem;
 }
 
 /* Stat panel düzen düzeltmeleri */
@@ -98,6 +96,7 @@
 /* Başlık bölümü için sabit yükseklik */
 .stat-header {
     min-height: 3rem;
+    margin-left: 0.7rem;
     display: flex;
     align-items: center;
 }
@@ -108,7 +107,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0.5rem 0;
+    margin: 0;
 }
 
 /* Metrikler için konteyner */
@@ -206,4 +205,24 @@
 canvas {
     width: 100% !important;
     height: 100% !important;
+}
+
+/* Modern SVG ikonlar için stil */
+.modern-icon {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+    vertical-align: middle;
+    margin-right: 0.75rem;
+    color: var(--baslik-color, #444);
+}
+
+/* Başlık bölümü için düzenleme */
+.stat-header h3 {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.column{
+    margin-top: 8rem;
 }

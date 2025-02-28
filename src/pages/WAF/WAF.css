@@ -8,6 +8,7 @@
     margin-bottom: 10rem !important;
 }
 
+
 #menu-bar {
     width: 100%;
     height: 40px;
@@ -82,10 +83,19 @@
 
 }
 
+.card{
+    width: 28% !important;
+}
+
 .content {
+    color: var(--bold-text-color);
     width: 90%;
 }
 
+.component{
+    background-color: var(--component-color) !important;
+    border:none !important;
+}
 /* Stat panel düzen düzeltmeleri */
 .stat-panel {
     height: 100%;
@@ -207,6 +217,11 @@ canvas {
     height: 100% !important;
 }
 
+.icon {
+    width: 20px !important;
+    height: 20px !important;
+}
+
 /* Modern SVG ikonlar için stil */
 .modern-icon {
     width: 24px;
@@ -225,4 +240,12 @@ canvas {
 
 .column{
     margin-top: 8rem;
+}
+
+/* Kullanım oranına göre renk değişkenleri */
+:root {
+    --yesil-color: #28a745;
+    --sari-color: #ffc107;
+    --turuncu-color: #ff8000;
+    --kirmizi-color: #dc3545;
 }

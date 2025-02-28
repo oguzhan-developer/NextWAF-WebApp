@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import './Menu.css';
 import { getCookieJSON, removeCookie } from '../../utils/cookie';
+import i_profile from "../../assets/icons/i_profile.svg";
+import i_logout from "../../assets/icons/i_logout.svg";
+import i_settings from "../../assets/icons/i_settings.svg";
+import i_profiles from "../../assets/icons/i_profiles.svg";
+import i_arrow_down from "../../assets/icons/i_arrow_down.svg";
 
 function Menu() {
     const [username, setUsername] = useState('');
@@ -42,17 +47,22 @@ function Menu() {
             </div>
             <div className="menu-items">
                 <div className="menu-item user-info" onClick={toggleDropdown}>
-                    <i className=' user circle icon'></i><strong style={{margin:"0 0.2rem"}}>{username}</strong> <i className=" angle down icon"></i>
+                    <img src={i_profile} id='profile_icon' />
+                    <strong id='username_text'>{username}</strong>
+                    <img src={i_arrow_down} style={{width:"13px", marginLeft:"0.15rem"}} />
                     {dropdownOpen && (
                         <div className="dropdown-content">
                             <div className="dropdown-item">
-                                <i className="user icon"></i> Profil
+                            <img src={i_profiles} className='menu_icon' />
+                            Profiller
                             </div>
                             <div className="dropdown-item">
-                                <i className="settings icon"></i> Ayarlar
+                            <img src={i_settings} className='menu_icon' />
+                            Ayarlar
                             </div>
                             <div className="dropdown-item" onClick={handleLogout}>
-                                <i className="sign-out icon"></i> Çıkış Yap
+                            <img src={i_logout} className='menu_icon' />
+                            Güvenli Çıkış Yap
                             </div>
                         </div>
                     )}

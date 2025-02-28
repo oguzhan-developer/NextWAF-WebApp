@@ -7,6 +7,12 @@ import { Table, Segment, Header, Grid, Statistic } from 'semantic-ui-react';
 import { fetchLogs, fetchServerStats } from '../../utils/api';
 import { Line } from 'react-chartjs-2';
 import { GrStorage } from "react-icons/gr";
+import i_ram from '../../assets/icons/i_ram.svg';
+import i_cpu from '../../assets/icons/i_cpu.svg';
+import i_storage from '../../assets/icons/i_storage.svg';
+import i_profile from '../../assets/icons/i_profile.svg';
+import i_logout from '../../assets/icons/i_logout.svg';
+
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -46,10 +52,10 @@ const ModernIcon = ({ name, ...props }) => {
         <line x1="15" y1="1" x2="15" y2="4"></line>
         <line x1="9" y1="20" x2="9" y2="23"></line>
         <line x1="15" y1="20" x2="15" y2="23"></line>
-        <line x1="20" y1="9" x2="23" y2="9"></line>
-        <line x1="20" y1="14" x2="23" y2="14"></line>
-        <line x1="1" y1="9" x2="4" y2="9"></line>
-        <line x1="1" y1="14" x2="4" y2="14"></line>
+        <line x1="20" y1="9" x2="23"></line>
+        <line x1="20" y1="14" x2="23"></line>
+        <line x1="1" y1="9" x2="4"></line>
+        <line x1="1" y1="14" x2="4"></line>
       </svg>
     ),
     disk: (
@@ -60,7 +66,7 @@ const ModernIcon = ({ name, ...props }) => {
     ),
     logs: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2zm4 5h10M7 14h10"></path>
+        <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c1.1 0-2 .9-2 2zm4 5h10M7 14h10"></path>
       </svg>
     ),
   };
@@ -84,7 +90,7 @@ function WAF() {
         diskYuzdesi: 0,
     });
 
-    // Grafik ayarlarını güncelleyelim - etiketleri kaldırmak için düzenliyoruz
+    // Grafik ayarlarını güncelleyelim
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -93,7 +99,7 @@ function WAF() {
                 beginAtZero: true,
                 suggestedMax: 100,
                 title: {
-                    display: false, // Y ekseni başlığını kaldır
+                    display: false,
                 },
                 ticks: {
                     maxTicksLimit: 5,
@@ -104,7 +110,7 @@ function WAF() {
             },
             x: {
                 title: {
-                    display: false, // X ekseni başlığını kaldır
+                    display: false,
                 },
                 ticks: {
                     maxTicksLimit: 6,
@@ -115,7 +121,7 @@ function WAF() {
         },
         plugins: {
             legend: {
-                display: false, // Efsaneyi tamamen kaldır
+                display: false,
             },
             tooltip: {
                 callbacks: {
@@ -124,18 +130,15 @@ function WAF() {
                     }
                 }
             },
-            filler: {
-                propagate: true
-            }
         },
         elements: {
             point: {
-                radius: 2, // Daha küçük noktalar
+                radius: 2,
                 hoverRadius: 5,
             },
             line: {
                 tension: 0.3,
-                fill: true,
+                fill: false, // Dolguyu kapatıyoruz
             }
         },
     };
@@ -154,6 +157,49 @@ function WAF() {
         
         // Diğer durumlar için olduğu gibi bırak
         return value + '%';
+    };
+
+    // Kullanım oranına göre renk belirleme yardımcı fonksiyonu
+    const getColorByUsage = (percentage) => {
+        if (percentage >= 90) {
+            return {
+                border: 'rgba(220, 53, 69, 1)',      // Kırmızı
+                background: 'rgba(220, 53, 69, 0.5)'
+            };
+        } else if (percentage >= 85) {
+            return {
+                border: 'rgba(255, 128, 0, 1)',      // Turuncu
+                background: 'rgba(255, 128, 0, 0.5)'
+            };
+        } else if (percentage >= 70) {
+            return {
+                border: 'rgba(255, 193, 7, 1)',      // Sarı
+                background: 'rgba(255, 193, 7, 0.5)'
+            };
+        } else {
+            return {
+                border: 'rgba(40, 167, 69, 1)',      // Yeşil
+                background: 'rgba(40, 167, 69, 0.5)'
+            };
+        }
+    };
+
+    // Renk yaratan fonksiyon - önceki değerlere göre her nokta için ayrı renk
+    const generateColors = (dataPoints) => {
+        const borderColors = [];
+        const backgroundColors = [];
+
+        for (let i = 0; i < dataPoints.length; i++) {
+            const value = parseFloat(dataPoints[i]);
+            const colors = getColorByUsage(value);
+            borderColors.push(colors.border);
+            backgroundColors.push(colors.background);
+        }
+
+        return {
+            borderColors,
+            backgroundColors
+        };
     };
 
     useEffect(() => {
@@ -206,7 +252,7 @@ function WAF() {
         );
     };
 
-    // Grafik verilerini hazırla - dolgu sorununu çözmek için güncelledik
+    // Grafik verilerini hazırla - sadece çizgi renklerini değerlere göre ayarla
     const prepareChartData = (dataType) => {
         if (!statsHistory || statsHistory.length === 0) return null;
 
@@ -219,56 +265,57 @@ function WAF() {
             return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
         });
 
-        let data = {};
-        
-        // Tüm grafik tipleri için ortak ayarlar
-        const commonDatasetProps = {
-            borderWidth: 2,
-            pointRadius: 1, 
-            pointHoverRadius: 6,
-            tension: 0.3,
-            fill: true, // Dolgu aktif
-        };
+        // Değerler ve renkler için veri hazırlama
+        let dataValues = [];
+        let colorThresholds = [];
 
         if (dataType === 'ram') {
-            data = {
-                labels,
-                datasets: [
-                    {
-                        ...commonDatasetProps,
-                        data: reversedData.map(stat => stat.RAMYuzdesi),
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    }
-                ]
-            };
+            dataValues = reversedData.map(stat => stat.RAMYuzdesi);
         } else if (dataType === 'cpu') {
-            data = {
-                labels,
-                datasets: [
-                    {
-                        ...commonDatasetProps,
-                        data: reversedData.map(stat => stat.CPUYuzdesi),
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        backgroundColor: 'rgba(255, 159, 64, 0.5)',
-                    }
-                ]
-            };
+            dataValues = reversedData.map(stat => stat.CPUYuzdesi);
         } else if (dataType === 'disk') {
-            data = {
-                labels,
-                datasets: [
-                    {
-                        ...commonDatasetProps,
-                        data: reversedData.map(stat => stat.diskYuzdesi),
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        backgroundColor: 'rgba(153, 102, 255, 0.5)',
-                    }
-                ]
-            };
+            dataValues = reversedData.map(stat => stat.diskYuzdesi);
         }
 
-        return data;
+        // Çizgi segmentleri için renk eşiklerini belirleme
+        colorThresholds = dataValues.map(value => {
+            if (value >= 90) return 'rgba(220, 53, 69, 1)';      // Kırmızı (≥90%)
+            if (value >= 85) return 'rgba(255, 128, 0, 1)';      // Turuncu (≥85%)
+            if (value >= 70) return 'rgba(255, 193, 7, 1)';      // Sarı (≥70%)
+            return 'rgba(40, 167, 69, 1)';                       // Yeşil (<70%)
+        });
+
+        // Veri setini oluştur
+        return {
+            labels,
+            datasets: [
+                {
+                    data: dataValues,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false,
+                    segment: {
+                        borderColor: ctx => colorThresholds[ctx.p0DataIndex],
+                    },
+                    pointBackgroundColor: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return colorThresholds[index];
+                    },
+                    pointBorderColor: (ctx) => {
+                        const index = ctx.dataIndex;
+                        return colorThresholds[index];
+                    },
+                }
+            ]
+        };
+    };
+
+    // Kullanım oranına göre panelin üst kısmındaki yüzde değerinin rengini belirleme
+    const getUsageColor = (percentage) => {
+        if (percentage >= 90) return { color: 'var(--kirmizi-color, #dc3545)' };
+        if (percentage >= 85) return { color: 'var(--turuncu-color, #ff8000)' };
+        if (percentage >= 70) return { color: 'var(--sari-color, #ffc107)' };
+        return { color: 'var(--yesil-color, #28a745)' };
     };
 
     return (
@@ -277,11 +324,12 @@ function WAF() {
             <div className="content">
                 <Grid columns={3} stackable>
                     {/* RAM Grafiği */}
-                    <Grid.Column>
-                        <Segment className="stat-panel">
+                    <Grid.Column className='card'>
+                        <Segment className="stat-panel component">
                             <div className="stat-header">
                                 <Header as='h3'>
-                                    <ModernIcon name="ram" className="modern-icon" />
+                                    <img src={i_ram} className='icon' />
+                                    {/* <ModernIcon name="ram" className="modern-icon" /> */}
                                     <Header.Content>RAM Kullanımı</Header.Content>
                                 </Header>
                             </div>
@@ -289,7 +337,9 @@ function WAF() {
                                 <div className="metrics-container">
                                     <div className="usage-percentage">
                                         <Statistic>
-                                            <Statistic.Value>{formatPercentage(latestStats.RAMYuzdesi)}</Statistic.Value>
+                                            <Statistic.Value style={getUsageColor(latestStats.RAMYuzdesi)}>
+                                                {formatPercentage(latestStats.RAMYuzdesi)}
+                                            </Statistic.Value>
                                             <Statistic.Label>Kullanım</Statistic.Label>
                                         </Statistic>
                                     </div>
@@ -318,43 +368,6 @@ function WAF() {
                                                         ctx.fillRect(0, 0, chart.width, chart.height);
                                                         ctx.restore();
                                                     }
-                                                },
-                                                // Dolgu için özel plugin
-                                                {
-                                                    id: 'customFill',
-                                                    beforeDatasetDraw: (chart) => {
-                                                        const ctx = chart.canvas.getContext('2d');
-                                                        ctx.save();
-                                                        ctx.fillStyle = chart.data.datasets[0].backgroundColor;
-                                                        
-                                                        // Y ekseninin başlangıcından veri noktalarına kadar olan alanı doldur
-                                                        const meta = chart.getDatasetMeta(0);
-                                                        const yScale = chart.scales.y;
-                                                        const xScale = chart.scales.x;
-                                                        const bottom = yScale.getPixelForValue(0);
-                                                        
-                                                        ctx.beginPath();
-                                                        ctx.moveTo(xScale.left, bottom);
-                                                        
-                                                        // İlk noktayı tanımla
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[0].x, meta.data[0].y);
-                                                        }
-                                                        
-                                                        // Diğer noktaları tanımla
-                                                        meta.data.forEach((point) => {
-                                                            ctx.lineTo(point.x, point.y);
-                                                        });
-                                                        
-                                                        // Son noktadan alta ve başlangıca
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[meta.data.length - 1].x, bottom);
-                                                        }
-                                                        ctx.lineTo(xScale.left, bottom);
-                                                        
-                                                        ctx.fill();
-                                                        ctx.restore();
-                                                    }
                                                 }
                                             ]}
                                         />
@@ -365,11 +378,13 @@ function WAF() {
                     </Grid.Column>
 
                     {/* CPU Grafiği */}
-                    <Grid.Column>
-                        <Segment className="stat-panel">
+                    <Grid.Column className='card'>
+                        <Segment className="stat-panel component">
                             <div className="stat-header">
                                 <Header as='h3'>
-                                    <ModernIcon name="cpu" className="modern-icon" />
+                                <img src={i_cpu} className='icon' />
+                                    {/* <ModernIcon name="cpu" className="modern-icon" /> */}
+                                    
                                     <Header.Content>CPU Kullanımı</Header.Content>
                                 </Header>
                             </div>
@@ -377,7 +392,9 @@ function WAF() {
                                 <div className="metrics-container">
                                     <div className="usage-percentage">
                                         <Statistic>
-                                            <Statistic.Value>{formatPercentage(latestStats.CPUYuzdesi)}</Statistic.Value>
+                                            <Statistic.Value style={getUsageColor(latestStats.CPUYuzdesi)}>
+                                                {formatPercentage(latestStats.CPUYuzdesi)}
+                                            </Statistic.Value>
                                             <Statistic.Label>Kullanım</Statistic.Label>
                                         </Statistic>
                                     </div>
@@ -402,41 +419,8 @@ function WAF() {
                                                         const ctx = chart.canvas.getContext('2d');
                                                         ctx.save();
                                                         ctx.globalCompositeOperation = 'destination-over';
-                                                        ctx.fillStyle = 'white';
+                                                        ctx.fillStyle = 'white'; 
                                                         ctx.fillRect(0, 0, chart.width, chart.height);
-                                                        ctx.restore();
-                                                    }
-                                                },
-                                                // Dolgu için aynı özel plugin
-                                                {
-                                                    id: 'customFillCPU',
-                                                    beforeDatasetDraw: (chart) => {
-                                                        const ctx = chart.canvas.getContext('2d');
-                                                        ctx.save();
-                                                        ctx.fillStyle = chart.data.datasets[0].backgroundColor;
-                                                        
-                                                        const meta = chart.getDatasetMeta(0);
-                                                        const yScale = chart.scales.y;
-                                                        const xScale = chart.scales.x;
-                                                        const bottom = yScale.getPixelForValue(0);
-                                                        
-                                                        ctx.beginPath();
-                                                        ctx.moveTo(xScale.left, bottom);
-                                                        
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[0].x, meta.data[0].y);
-                                                        }
-                                                        
-                                                        meta.data.forEach((point) => {
-                                                            ctx.lineTo(point.x, point.y);
-                                                        });
-                                                        
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[meta.data.length - 1].x, bottom);
-                                                        }
-                                                        ctx.lineTo(xScale.left, bottom);
-                                                        
-                                                        ctx.fill();
                                                         ctx.restore();
                                                     }
                                                 }
@@ -449,12 +433,12 @@ function WAF() {
                     </Grid.Column>
 
                     {/* Disk Grafiği */}
-                    <Grid.Column>
-                        <Segment className="stat-panel">
+                    <Grid.Column className='card'>
+                        <Segment className="stat-panel component">
                             <div className="stat-header">
                                 <Header as='h3'>
-                                    <GrStorage className="modern-icon" />
-                                    {/* <ModernIcon name="disk" className="modern-icon" /> */}
+                                <img src={i_storage} className='icon' />
+                                {/* <ModernIcon name="disk" className="modern-icon" /> */}
                                     <Header.Content>Disk Kullanımı</Header.Content>
                                 </Header>
                             </div>
@@ -462,7 +446,9 @@ function WAF() {
                                 <div className="metrics-container">
                                     <div className="usage-percentage">
                                         <Statistic>
-                                            <Statistic.Value>{formatPercentage(latestStats.diskYuzdesi)}</Statistic.Value>
+                                            <Statistic.Value style={getUsageColor(latestStats.diskYuzdesi)}>
+                                                {formatPercentage(latestStats.diskYuzdesi)}
+                                            </Statistic.Value>
                                             <Statistic.Label>Kullanım</Statistic.Label>
                                         </Statistic>
                                     </div>
@@ -489,39 +475,6 @@ function WAF() {
                                                         ctx.globalCompositeOperation = 'destination-over';
                                                         ctx.fillStyle = 'white';
                                                         ctx.fillRect(0, 0, chart.width, chart.height);
-                                                        ctx.restore();
-                                                    }
-                                                },
-                                                // Dolgu için aynı özel plugin
-                                                {
-                                                    id: 'customFillDisk',
-                                                    beforeDatasetDraw: (chart) => {
-                                                        const ctx = chart.canvas.getContext('2d');
-                                                        ctx.save();
-                                                        ctx.fillStyle = chart.data.datasets[0].backgroundColor;
-                                                        
-                                                        const meta = chart.getDatasetMeta(0);
-                                                        const yScale = chart.scales.y;
-                                                        const xScale = chart.scales.x;
-                                                        const bottom = yScale.getPixelForValue(0);
-                                                        
-                                                        ctx.beginPath();
-                                                        ctx.moveTo(xScale.left, bottom);
-                                                        
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[0].x, meta.data[0].y);
-                                                        }
-                                                        
-                                                        meta.data.forEach((point) => {
-                                                            ctx.lineTo(point.x, point.y);
-                                                        });
-                                                        
-                                                        if (meta.data.length > 0) {
-                                                            ctx.lineTo(meta.data[meta.data.length - 1].x, bottom);
-                                                        }
-                                                        ctx.lineTo(xScale.left, bottom);
-                                                        
-                                                        ctx.fill();
                                                         ctx.restore();
                                                     }
                                                 }

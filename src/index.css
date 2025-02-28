@@ -1,5 +1,9 @@
 :root{
-  --arkaplan-color:#EAEBED;
+  --arkaplan-color:#fffefb;
+  --menu-color: #b6ccd8;
+  --component-color: #f5f4f1;
+  --text-color: #355E6E;
+  --bold-text-color: #171717;
   --arkaplan-color-daha-acik: #e1e2e4;
   --baslik-color: rgb(37, 52, 80);
   --alt-baslik-color: rgb(37, 52, 80);

@@ -44,7 +44,7 @@ function WAF() {
         diskYuzdesi: 0,
     });
 
-    // Grafik verilerinin renk ve stil ayarları
+    // Grafik verilerinin renk ve stil ayarları - daha fazla boşluk için güncellendi
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -54,12 +54,22 @@ function WAF() {
                 title: {
                     display: true,
                     text: 'Kullanım'
+                },
+                ticks: {
+                    // Y ekseninde daha az tick göster
+                    maxTicksLimit: 5
                 }
             },
             x: {
                 title: {
                     display: true,
                     text: 'Zaman'
+                },
+                ticks: {
+                    // X ekseninde daha az tick göster
+                    maxTicksLimit: 6,
+                    maxRotation: 0,
+                    minRotation: 0
                 }
             }
         },
@@ -67,6 +77,17 @@ function WAF() {
             legend: {
                 position: 'top',
             },
+        },
+        elements: {
+            // Noktaları daha belirgin yap
+            point: {
+                radius: 3,
+                hoverRadius: 7,
+            },
+            // Çizgilere daha fazla boşluk ver
+            line: {
+                tension: 0.3,  // Çizgileri biraz kavis ekle
+            }
         },
     };
 
@@ -94,8 +115,8 @@ function WAF() {
             const logData = await fetchLogs();
             setLogs(logData);
 
-            // Sunucu istatistiklerini yükle (son 10 kayıt)
-            const statsData = await fetchServerStats(20);
+            // Sunucu istatistiklerini yükle (son 10 kayıt) - daha az veri için 20'den 10'a düşürüldü
+            const statsData = await fetchServerStats(10);
             console.log("Statsdataa: ", statsData);
             
             setStatsHistory(statsData);
@@ -120,16 +141,17 @@ function WAF() {
         );
     };
 
-    // Grafik verilerini hazırla
+    // Grafik verilerini hazırla - daha temiz zaman bilgisi için güncellendi
     const prepareChartData = (dataType) => {
         if (!statsHistory || statsHistory.length === 0) return null;
 
         // Grafik için verileri ters çevir (en eski sol tarafta olsun)
         const reversedData = [...statsHistory].reverse();
         
+        // Daha net zaman bilgisi için saat:dakika formatı
         const labels = reversedData.map(stat => {
             const date = new Date(stat.tarih);
-            return `${date.getHours()}:${date.getMinutes()}`;
+            return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
         });
 
         let data = {};
@@ -143,12 +165,15 @@ function WAF() {
                         data: reversedData.map(stat => stat.usingRAM),
                         borderColor: 'rgb(255, 99, 132)',
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderWidth: 2, // Çizgi kalınlığını artır
                     },
                     {
                         label: 'Toplam RAM (MB)',
                         data: reversedData.map(stat => stat.totalRAM),
                         borderColor: 'rgb(53, 162, 235)',
                         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        borderWidth: 2, // Çizgi kalınlığını artır
+                        borderDash: [5, 5], // Kesikli çizgi
                     }
                 ]
             };
@@ -161,12 +186,15 @@ function WAF() {
                         data: reversedData.map(stat => stat.usingCPU),
                         borderColor: 'rgb(255, 159, 64)',
                         backgroundColor: 'rgba(255, 159, 64, 0.5)',
+                        borderWidth: 2,
                     },
                     {
                         label: 'Toplam CPU',
                         data: reversedData.map(stat => stat.totalCPU),
                         borderColor: 'rgb(75, 192, 192)',
                         backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
                     }
                 ]
             };
@@ -179,6 +207,8 @@ function WAF() {
                         data: reversedData.map(stat => stat.diskYuzdesi),
                         borderColor: 'rgb(153, 102, 255)',
                         backgroundColor: 'rgba(153, 102, 255, 0.5)',
+                        borderWidth: 2,
+                        fill: true,  // Alan doldur
                     }
                 ]
             };
@@ -195,24 +225,34 @@ function WAF() {
                     {/* RAM Grafiği */}
                     <Grid.Column>
                         <Segment className="stat-panel">
-                            <Header as='h3'>
-                                <Icon name='microchip' />
-                                <Header.Content>RAM Kullanımı</Header.Content>
-                            </Header>
-                            <Statistic.Group size="small">
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.RAMYuzdesi}%</Statistic.Value>
-                                    <Statistic.Label>Kullanım</Statistic.Label>
-                                </Statistic>
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.usingRAM}/{latestStats.totalRAM}</Statistic.Value>
-                                    <Statistic.Label>MB</Statistic.Label>
-                                </Statistic>
-                            </Statistic.Group>
+                            <div className="stat-header">
+                                <Header as='h3'>
+                                    <Icon name='microchip' />
+                                    <Header.Content>RAM Kullanımı</Header.Content>
+                                </Header>
+                            </div>
+                            <div className="stat-metrics">
+                                <div className="metrics-container">
+                                    <div className="usage-percentage">
+                                        <Statistic>
+                                            <Statistic.Value>{latestStats.RAMYuzdesi}%</Statistic.Value>
+                                            <Statistic.Label>Kullanım</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                    <div className="usage-amount">
+                                        <Statistic size="tiny" className="faded-stat">
+                                            <Statistic.Value>{latestStats.usingRAM}/{latestStats.totalRAM}</Statistic.Value>
+                                            <Statistic.Label>MB</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="chart-container">
-                                {prepareChartData('ram') && 
-                                    <Line options={chartOptions} data={prepareChartData('ram')} height={200} />
-                                }
+                                <div className="chart-wrapper">
+                                    {prepareChartData('ram') && 
+                                        <Line options={chartOptions} data={prepareChartData('ram')} />
+                                    }
+                                </div>
                             </div>
                         </Segment>
                     </Grid.Column>
@@ -220,24 +260,34 @@ function WAF() {
                     {/* CPU Grafiği */}
                     <Grid.Column>
                         <Segment className="stat-panel">
-                            <Header as='h3'>
-                                <Icon name='server' />
-                                <Header.Content>CPU Kullanımı</Header.Content>
-                            </Header>
-                            <Statistic.Group size="small">
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.CPUYuzdesi}%</Statistic.Value>
-                                    <Statistic.Label>Kullanım</Statistic.Label>
-                                </Statistic>
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.usingCPU}/{latestStats.totalCPU}</Statistic.Value>
-                                    <Statistic.Label>CPU</Statistic.Label>
-                                </Statistic>
-                            </Statistic.Group>
+                            <div className="stat-header">
+                                <Header as='h3'>
+                                    <Icon name='server' />
+                                    <Header.Content>CPU Kullanımı</Header.Content>
+                                </Header>
+                            </div>
+                            <div className="stat-metrics">
+                                <div className="metrics-container">
+                                    <div className="usage-percentage">
+                                        <Statistic>
+                                            <Statistic.Value>{latestStats.CPUYuzdesi}%</Statistic.Value>
+                                            <Statistic.Label>Kullanım</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                    <div className="usage-amount">
+                                        <Statistic size="tiny" className="faded-stat">
+                                            <Statistic.Value>{latestStats.usingCPU}/{latestStats.totalCPU}</Statistic.Value>
+                                            <Statistic.Label>CPU</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="chart-container">
-                                {prepareChartData('cpu') && 
-                                    <Line options={chartOptions} data={prepareChartData('cpu')} height={200} />
-                                }
+                                <div className="chart-wrapper">
+                                    {prepareChartData('cpu') && 
+                                        <Line options={chartOptions} data={prepareChartData('cpu')} />
+                                    }
+                                </div>
                             </div>
                         </Segment>
                     </Grid.Column>
@@ -245,24 +295,34 @@ function WAF() {
                     {/* Disk Grafiği */}
                     <Grid.Column>
                         <Segment className="stat-panel">
-                            <Header as='h3'>
-                                <Icon name='hdd' />
-                                <Header.Content>Disk Kullanımı</Header.Content>
-                            </Header>
-                            <Statistic.Group size="small">
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.diskYuzdesi}%</Statistic.Value>
-                                    <Statistic.Label>Kullanım</Statistic.Label>
-                                </Statistic>
-                                <Statistic>
-                                    <Statistic.Value>{latestStats.usingDisk}/{latestStats.totalDisk}</Statistic.Value>
-                                    <Statistic.Label>GB</Statistic.Label>
-                                </Statistic>
-                            </Statistic.Group>
+                            <div className="stat-header">
+                                <Header as='h3'>
+                                    <Icon name='hdd' />
+                                    <Header.Content>Disk Kullanımı</Header.Content>
+                                </Header>
+                            </div>
+                            <div className="stat-metrics">
+                                <div className="metrics-container">
+                                    <div className="usage-percentage">
+                                        <Statistic>
+                                            <Statistic.Value>{latestStats.diskYuzdesi}%</Statistic.Value>
+                                            <Statistic.Label>Kullanım</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                    <div className="usage-amount">
+                                        <Statistic size="tiny" className="faded-stat">
+                                            <Statistic.Value>{latestStats.usingDisk}/{latestStats.totalDisk}</Statistic.Value>
+                                            <Statistic.Label>GB</Statistic.Label>
+                                        </Statistic>
+                                    </div>
+                                </div>
+                            </div>
                             <div className="chart-container">
-                                {prepareChartData('disk') && 
-                                    <Line options={chartOptions} data={prepareChartData('disk')} height={200} />
-                                }
+                                <div className="chart-wrapper">
+                                    {prepareChartData('disk') && 
+                                        <Line options={chartOptions} data={prepareChartData('disk')} />
+                                    }
+                                </div>
                             </div>
                         </Segment>
                     </Grid.Column>

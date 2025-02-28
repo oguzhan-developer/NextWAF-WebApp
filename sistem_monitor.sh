@@ -49,38 +49,29 @@ mysql_insert() {
     fi
 }
 
-
-# Veritabanı ve tabloyu hazırla
 setup_database
 
 echo "Sistem Monitörü"
 echo "Veriler MySQL veritabanına kaydediliyor..."
 
 while true; do
-    # Zaman bilgisi
     currentTime=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "\n$currentTime"
     echo "----------------------------------------"
     
-    # RAM bilgileri
     totalRAM=$(free -m | grep Mem | awk '{print $2}')
     usingRAM=$(free -m | grep Mem | awk '{print $3}')
     usingRAMYuzde=$(free | grep Mem | awk '{printf("%.2f"), $3/$2*100}')
     
-    # CPU kullanım yüzdesi - mpstat ile alınıyor
     bostaCPUYuzde=$(mpstat | grep -A 5 "%idle" | tail -n 1 | awk '{print $NF}')
-    usingCPUYuzde=$(awk -v idle="$bostaCPUYuzde" 'BEGIN {printf "%.2f", 100 - idle}')
+    usingCPUYuzde=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
     
-    # CPU çekirdek sayısı ve toplam CPU kapasitesi
     cpu_cores=$(grep -c ^processor /proc/cpuinfo)
     
-    # Toplam CPU kapasitesi (çekirdek sayısı * frekans)
     totalCPU=$(awk -v cores="$cpu_cores" 'BEGIN {printf "%.2f", cores}')
     
-    # Kullanılan CPU miktarı (toplam kapasite * kullanım yüzdesi / 100)
     usingCPU=$(awk -v total="$totalCPU" -v usage="$usingCPUYuzde" 'BEGIN {printf "%.2f", total * usage / 100}')
-    
-    # Disk bilgileri
+        
     df_output=$(df -h / | tail -n 1)
     total_disk=$(echo "$df_output" | awk '{print $2}')
     used_disk=$(echo "$df_output" | awk '{print $3}')

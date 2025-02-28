@@ -1,4 +1,5 @@
 import axios from 'axios';
+//username: admin
 //pass rootroot
 const port = import.meta.env.VITE_APP_API_PORT || 5058;
 console.log(port);
@@ -15,9 +16,9 @@ export const fetchLogs = async () => {
     }
 };
 
-export const fetchServerStats = async () => {
+export const fetchServerStats = async (limit) => {
     try {
-        const response = await axios.get(`http://localhost:${port}/api/server-stats`);
+        const response = await axios.get(`http://localhost:${port}/api/server-stats?limit=${limit}`);
         return response.data.stats;
     } catch (error) {
         console.error('Sunucu istatistiklerini çekerken hata oluştu:', error);

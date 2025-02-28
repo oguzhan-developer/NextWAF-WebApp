@@ -67,13 +67,14 @@ app.get('/api/packets', (req, res) => {
 });
 
 app.get('/api/server-stats', (req, res) => {
-  const query = 'SELECT * FROM server_stats';
+  const limit = parseInt(req.query.limit) || 20;
+  const query = `SELECT * FROM sistem_monitor ORDER BY tarih DESC LIMIT ${limit}`;
   connection.query(query, (err, results) => {
     if (err) {
       console.error('Sunucu istatistiklerini çekerken hata oluştu: ', err);
       return res.status(500).json({ success: false, message: 'Sunucu hatası' });
     }
-    res.json({ success: true, stats: results[0] });
+    res.json({ success: true, stats: results });
   });
 });
 

@@ -56,10 +56,6 @@ function Menu() {
                             <img src={i_profiles} className='menu_icon' />
                             Profiller
                             </div>
-                            <div className="dropdown-item">
-                            <img src={i_settings} className='menu_icon' />
-                            Ayarlar
-                            </div>
                             <div className="dropdown-item" onClick={handleLogout}>
                             <img src={i_logout} className='menu_icon' />
                             Güvenli Çıkış Yap

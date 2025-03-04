@@ -1,11 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Segment, Header, Grid, Statistic, Icon } from 'semantic-ui-react';
 import { Line, Pie } from 'react-chartjs-2';
-import { fetchIsApacheActive, fetchLogs, fetchOpenPorts, fetchServerIp, fetchServerStats } from '../../utils/api';
-import './WAF.css';
+import { fetchIsApacheActive, fetchIsSystemActive, fetchLogs, fetchOpenPorts, fetchServerIp, fetchServerStats } from '../../../utils/api.jsx';
+import './DurumPaneli.css';
 
-function SystemHealth() {
+// Chart.js için gerekli tüm bileşenleri import ediyoruz
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+} from 'chart.js';
+
+// Chart.js bileşenlerini kaydet - bu önemli, eksik olursa grafik çalışmaz
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement
+);
+
+// ModernIcon bileşeni - WAF.jsx'ten alındı
+const ModernIcon = ({ name, ...props }) => {
+  const icons = {
+    logs: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+        <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c1.1 0-2 .9-2 2zm4 5h10M7 14h10"></path>
+      </svg>
+    ),
+    // diğer ikonlar buraya eklenebilir
+  };
+
+  return icons[name] || null;
+};
+
+function DurumPaneli() {
     const [logs, setLogs] = useState([]);
+    const [isSystemActive, setIsSystemActive] = useState('Getiriliyor...');
     const [serverIp, setServerIp] = useState('0.0.0.0');
     const [isApacheActive, setIsApacheActive] = useState('Getiriliyor...');
     const [openPorts, setOpenPorts] = useState('Getiriliyor...');
@@ -204,6 +244,7 @@ function SystemHealth() {
     useEffect(() => {
         const loadData = async () => {
             try {
+                setIsSystemActive(await fetchIsSystemActive())
                 const logData = await fetchLogs();
                 setLogs(logData);
 
@@ -223,6 +264,10 @@ function SystemHealth() {
         };
 
         loadData();
+        if(isSystemActive == "Pasif"){
+            alert("Sistem İletişimi Pasif, Yöneticinizle iletişime geçiniz!");
+
+        }
         const intervalId = setInterval(loadData, 60000);
 
         return () => clearInterval(intervalId);
@@ -416,7 +461,7 @@ function SystemHealth() {
                                     </Table.Row>
                                     <Table.Row>
                                         <Table.Cell className="info-label">Sistem İletişim Servisi (Nginx)</Table.Cell>
-                                        <Table.Cell><span style={{ color: "green" }}>Aktif</span></Table.Cell>
+                                        <Table.Cell><span style={{ color: isSystemActive == "Aktif" ? "green" : "red" }}>{isSystemActive}</span></Table.Cell>
                                     </Table.Row>
                                 </Table.Body>
                             </Table>
@@ -443,4 +488,4 @@ function SystemHealth() {
     );
 }
 
-export default SystemHealth;
+export default DurumPaneli;

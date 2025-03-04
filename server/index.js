@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 app.get('/api/user/:username', (req, res) => {
   const { username } = req.params;
   
-  const query = 'SELECT * FROM users WHERE username = ?';
+  const query = `select * from users where username = ?`;
   connection.query(query, [username], (err, results) => {
     if (err) {
       console.error('Sorgu sırasında hata oluştu: ', err);
@@ -40,7 +40,7 @@ app.get('/api/user/:username', (req, res) => {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+  const query = `select * from users where username = ? and password = ?`;
   connection.query(query, [username, password], (err, results) => {
     if (err) {
       console.error('Sorgu sırasında hata oluştu: ', err);
@@ -50,19 +50,88 @@ app.post('/api/login', (req, res) => {
     if (results.length > 0) {
       res.json({ success: true, username: username });
     } else {
+      console.log("resultss: ", results);
+      
       res.json({ success: false, message: 'Geçersiz kullanıcı adı veya şifre' });
     }
   });
 });
 
-app.get('/api/packets', (req, res) => {
-  const query = 'SELECT * FROM packets';
-  connection.query(query, (err, results) => {
+// Log API'sini düzenlenmiş hali - sayfalama, arama ve sıralama desteği ile
+app.get('/api/logs', (req, res) => {
+  // URL parametrelerini al
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || '';
+  const sortField = req.query.sortField || 'timestamp';
+  const sortDirection = req.query.sortDirection || 'desc';
+  
+  // Sayfalama için offset hesapla
+  const offset = (page - 1) * limit;
+  
+  // Toplam kayıt sayısını al (arama filtresi ile)
+  let countQuery = 'SELECT COUNT(*) as total FROM logs';
+  let queryParams = [];
+  
+  // Arama filtresi varsa SQL sorgusuna ekle
+  if (search) {
+    countQuery += ` WHERE 
+      id LIKE ? OR
+      ip_address LIKE ? OR
+      request_method LIKE ? OR
+      request_uri LIKE ? OR
+      user_agent LIKE ?`;
+    const searchParam = `%${search}%`;
+    queryParams = [searchParam, searchParam, searchParam, searchParam, searchParam];
+  }
+  
+  // Önce toplam kayıt sayısını bul
+  connection.query(countQuery, queryParams, (err, countResult) => {
     if (err) {
-      console.error('Logları çekerken hata oluştu: ', err);
+      console.error('Log sayısını hesaplarken hata oluştu: ', err);
       return res.status(500).json({ success: false, message: 'Sunucu hatası' });
     }
-    res.json({ success: true, packets: results });
+    
+    const total = countResult[0].total;
+    const totalPages = Math.ceil(total / limit);
+    
+    // Ana sorguyu oluştur
+    let query = 'SELECT * FROM logs';
+    
+    // Arama filtresi varsa ekle
+    if (search) {
+      query += ` WHERE 
+        id LIKE ? OR
+        ip_address LIKE ? OR
+        request_method LIKE ? OR
+        request_uri LIKE ? OR
+        user_agent LIKE ?`;
+    }
+    
+    // Sıralama ekle
+    query += ` ORDER BY id ${sortDirection === 'asc' ? 'asc' : 'desc'}`;
+    
+    // Sayfalama ekle
+    query += ` LIMIT ? OFFSET ?`;
+    
+    // Sorgu parametrelerine sayfalama parametrelerini ekle
+    queryParams.push(limit, offset);
+    
+    // Sorguyu çalıştır
+    connection.query(query, queryParams, (err, results) => {
+      if (err) {
+        console.error('Logları çekerken hata oluştu: ', err);
+        return res.status(500).json({ success: false, message: 'Sunucu hatası' });
+      }
+      
+      // HTTP başlıklarında sayfalama bilgilerini gönder
+      res.setHeader('X-Total-Count', total);
+      res.setHeader('X-Total-Pages', totalPages);
+      res.setHeader('X-Current-Page', page);
+      
+      // Sonuçları gönder
+      res.json(results);
+    });
   });
 });
 

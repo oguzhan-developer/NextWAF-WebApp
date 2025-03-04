@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
-import './WAFLayout.css';
+import './WAFLayout.css'
 import { Icon } from 'semantic-ui-react';
 import Menu from '../../../components/Menu/Menu';
 import { getCookieJSON } from '../../../utils/cookie';
-import i_health from '../../../assets/icons/i_health.svg';
-import i_monitor from '../../../assets/icons/i_monitor.svg';
-import i_settings from '../../../assets/icons/i_settings.svg';
+import i_status from '../../../assets/icons/i_status.svg';
+import i_cpu from '../../../assets/icons/i_cpu.svg';
+import i_logs from '../../../assets/icons/i_logs.svg';
 
 function WAFLayout() {
     const [username, setUsername] = useState('');
@@ -34,36 +34,43 @@ function WAFLayout() {
                 <div className="sidebar">
                     <div className="sidebar-menu">
                         <Link 
-                            to="/waf/system-health" 
-                            className={`sidebar-item ${isActive('/waf/system-health') ? 'active' : ''}`}
+                            to="/waf/dashboard" 
+                            className={`sidebar-item ${isActive('/waf/dashboard') ? 'active' : ''}`}
                         >
-                            <img src={i_health} alt="Sistem Sağlığı" className='icon' />
-                            <span>Sistem Sağlığı</span>
+                            <img src={i_status} alt="Durumlar" className='icon' />
+                            <span>Durum Paneli</span>
                         </Link>
                         <Link 
-                            to="/waf/tests" 
+                            to="/waf/system" 
+                            className={`sidebar-item ${isActive('/waf/system') ? 'active' : ''}`}
+                        >
+                            <img src={i_cpu} alt="Sistem" className='icon' />
+                            <span>Sistem</span>
+                        </Link>
+                        <Link 
+                            to="/waf/logs" 
                             className={`sidebar-item ${isActive('/waf/tests') ? 'active' : ''}`}
                         >
-                            <img src={i_monitor} alt="Loglar" className='icon' />
+                            
+                            <img src={i_logs} alt="Sistem" className='icon' />
                             <span>Loglar</span>
                         </Link>
-                        {/* Diğer menü öğeleri burada eklenebilir */}
-                        <Link to="/waf/settings" className="sidebar-item">
-                            <img src={i_settings} className='icon' />
-                            <span>Ayarlar</span>
+                        <Link to="#" className="sidebar-item">
+                            <Icon name="warning" />
+                            <span>Alarmlar</span>
                         </Link>
-                        <Link to="/rules" className="sidebar-item">
+                        <Link to="#" className="sidebar-item">
                             <Icon name="list" />
                             <span>Kurallar</span>
                         </Link>
-                        <Link to="/settings" className="sidebar-item">
+                        <Link to="#" className="sidebar-item">
                             <Icon name="settings" />
                             <span>Ayarlar</span>
                         </Link>
                     </div>
                 </div>
 
-                {/* Ana İçerik - child route'a göre değişir */}
+                {/* Ana İçerik - Outlet ile alt route'ların içeriği burada gösterilir */}
                 <div className="main-content">
                     <Outlet />
                 </div>

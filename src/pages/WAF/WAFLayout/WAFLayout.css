@@ -1,5 +1,460 @@
+#background {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: var(--arkaplan-color);
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10rem !important;
+}
+
+#menu-bar {
+    width: 100%;
+    height: 40px;
+    background-color: var(--arkaplan-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    z-index: 1000;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+#menu-content {
+    width: 97%;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 1rem;
+}
+
+#menu-logo {
+    font-size: 1rem;
+    width: 11rem;
+    color: var(--baslik-color);
+    margin: 0 !important;
+}
+
+#user-info {
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--alt-baslik-color);
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+#user-info:hover {
+    color: var(--baslik-color);
+}
+
+#menu-btn{
+    cursor:default;
+    margin: 0;
+}
+
+.ui.menu.inverted {
+    background-color: var(--arkaplan-color-daha-acik) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.ui.menu .item {
+    color: var(--alt-baslik-color) !important;
+   /* left: -10px !important; Açılır menüyü sola kaydır */
+
+}
+
+.ui.dropdown .menu {
+    background-color: var(--arkaplan-color) !important;
+    border: none !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+
+}
+
+.ui.dropdown .menu .item {
+    color: var(--alt-baslik-color) !important;
+
+}
+
+.card{
+    width: 25% !important;
+}
+
+.content {
+    color: var(--component-title-color);
+    /* width: 90%; */
+}
+
+.component{
+    background-color: var(--component-color) !important;
+    border:none !important;
+}
+/* Stat panel düzen düzeltmeleri */
+.stat-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Başlık bölümü için sabit yükseklik */
+.stat-header {
+    min-height: 3rem;
+    /* margin-left: 0.7rem; */
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+}
+
+/* Metrikler bölümü için sabit yükseklik */
+.stat-metrics {
+    min-height: 5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+/* Metrikler için konteyner */
+.metrics-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem;
+}
+
+/* Kullanım yüzdesini sola yasla */
+.usage-percentage {
+    text-align: left;
+    font-weight: bold;
+}
+
+/* Miktar değerini sağa yasla ve solgunlaştır */
+.usage-amount {
+    text-align: right;
+}
+
+/* Solgun istatistik stili */
+.faded-stat .value,
+.faded-stat .label {
+    opacity: 0.7 !important;
+    color: var(--alt-baslik-color) !important;
+    font-weight: normal !important;
+}
+
+/* İstatistik boyut ayarlamaları */
+.ui.statistic .value {
+    font-size: 1rem !important;
+    font-weight: bold !important;
+}
+
+.ui.statistic .label {
+    font-size: 0.8rem !important;
+}
+
+.ui.tiny.statistic .value {
+    font-size: 1rem !important;
+}
+
+.ui.tiny.statistic .label {
+    font-size: 0.9rem !important;
+}
+
+/* Grafik konteyneri - sabit yükseklik */
+.chart-container {
+    height: 220px;
+    position: relative;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+}
+
+/* Grafik konteyneri için transparan stil */
+.chart-container.transparent-bg {
+    background: transparent;
+}
+
+/* Grafik wrapper - sabit boyut ve taşma kontrolü */
+.chart-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+/* İstatistik stil düzeltmeleri */
+.ui.statistic .value {
+    font-size: 1.1rem !important;
+}
+
+.ui.statistic .label {
+    font-size: 0.8rem !important;
+}
+
+.ui.statistics {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin: 0;
+}
+
+/* Tablo ve segment stilleri */
+.segment {
+    margin-bottom: 2rem;
+}
+
+.table {
+    margin-top: 1rem;
+}
+
+/* Canvas elementi tam boyutlu olsun */
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    background: transparent !important;
+}
+
+.icon {
+    margin-right: 0.5rem;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* Modern SVG ikonlar için stil */
+.modern-icon {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.5;
+    vertical-align: middle;
+    margin-right: 0.75rem;
+    color: var(--baslik-color, #444);
+}
+
+/* Başlık bölümü için düzenleme */
+.stat-header h3 {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.column{
+    /* margin-top: 8rem; */
+}
+
+/* Kullanım oranına göre renk değişkenleri */
+:root {
+    --yesil-color: #28a745;
+    --sari-color: #ffc107;
+    --turuncu-color: #ff8000;
+    --kirmizi-color: #dc3545;
+}
+
+/* Sayfa düzeni için yeni stiller */
+.page-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    margin-top: 60px; /* Üst menü yüksekliği */
+}
+
+/* Sol kenar çubuğu */
+.sidebar {
+    width: 220px;
+    min-width: 220px;
+    height: calc(100vh - 60px);
+    background-color: var(--component-color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    position: fixed;
+    left: 0;
+    top: 60px;
+    z-index: 100;
+}
+
+.sidebar-menu {
+    padding: 1rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-item {
+    padding: 0.8rem 1.5rem;
+    color: var(--alt-baslik-color);
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0.1rem 0;
+    border-radius: 0;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-item i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-item:hover {
+    background-color: var(--arkaplan-color-daha-acik);
+    color: var(--baslik-color);
+    text-decoration: none;
+}
+
+.sidebar-item.active {
+    background-color: var(--arkaplan-color-daha-acik);
+    color: var(--baslik-color);
+    border-left: 3px solid var(--menu-color);
+    font-weight: bold;
+}
+
+
+/* Ana içerik alanı */
+.main-content {
+    margin-top: -6.5rem !important;
+    flex: 1;
+    padding: 1.5rem;
+    margin-left: 220px; /* Sol menü genişliği */
+    width: calc(100% - 220px);
+}
+
+/* Grid ve kart düzenlemeleri */
+.ui.grid {
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    margin-top: 8rem !important; /* Üst kenar boşluğu arttırıldı */
+    width: 33.33% !important; /* Genişlik 3'te 1 olarak ayarlandı */
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        min-width: 60px;
+    }
+
+    .sidebar-item span {
+        display: none;
+    }
+
+    .sidebar-item i {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
+
+    .main-content {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+    }
+}
+
+/* Pasta grafiği için özel konteyner stilleri */
+.pie-chart-container {
+    padding: 0px 15px 15px 15px !important; /* Üst kısmı azalttık, efsane oraya gelecek */
+    margin-top: 0 !important;
+    height: 180px !important; /* Yüksekliği azalttık */
+}
+
+.pie-chart-container .chart-wrapper {
+    margin-top: 0;
+}
+
+.pie-chart-container canvas {
+    max-height: 160px !important; /* Grafiği biraz daha küçülttük */
+    max-width: 160px !important;
+    margin: 0 auto;
+}
+
+.custom-chart-legend {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1.2rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    border-radius: 2px;
+}
+
+.free-color {
+    background-color: rgba(220, 220, 220, 0.8);
+}
+
+.legend-label {
+    font-size: 0.85rem;
+    color: var(--alt-baslik-color);
+}
+
+#system_info{
+    font-size: 1.02rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+#system_info #left{
+    text-align: left;
+    font-weight: bold;
+}
+#system_info #right{
+    text-align: right;
+    letter-spacing: 0.04rem;
+}
+
+/* Sistem bilgisi kartı için yeni stiller */
+.system-info-card {
+    margin-top: 1.5rem !important;
+    padding: 1.5rem !important;
+}
+
+.system-info-content {
+    padding: 1rem 0;
+}
+
+.system-table {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.system-table tr td {
+    padding: 0.65rem 1rem !important;
+}
+
+.system-table .info-label {
+    font-weight: bold;
+    color: var(--baslik-color);
+    width: 50%;
+}
+
 .sidebar-menu .icon{
     width: 16px !important;
     height: 16px !important;
     margin-right: 0.4rem;
+}
+
+.sidebar-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

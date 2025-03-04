@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from './pages/Login/Login';
 import WAFLayout from './pages/WAF/WAFLayout/WAFLayout';
-import WAF from './pages/WAF/WAF'; // Ana sistem sağlığı sayfası
-import WAFTests from './pages/WAF/WAFTests'; // Test sayfası
+import DurumPaneli from './pages/WAF/DurumPaneli/DurumPaneli';
+import Sistem from './pages/WAF/Sistem/Sistem';
 
 import './index.css'
 import { getCookieJSON } from './utils/cookie';
-import SystemHealth from './pages/WAF/SystemHealth';
+import Loglar from './pages/WAF/Loglar/Loglar';
 
 function App() {
   const isAuthenticated = () => {
@@ -18,14 +18,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={isAuthenticated() ? <Navigate to="/waf/system-health" /> : <Navigate to="/login" />} />
+        <Route path="/" element={isAuthenticated() ? <Navigate to="/waf/dashboard" /> : <Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         
-        {/* WAF Layout ile içinde farklı sayfalar gösteriyoruz */}
         <Route path="/waf" element={isAuthenticated() ? <WAFLayout /> : <Navigate to="/login" />}>
-          <Route index element={<Navigate to="/waf/system-health" />} />
-          <Route path="system-health" element={<SystemHealth />} />
-          <Route path="tests" element={<WAFTests />} />
+          <Route index element={<Navigate to="/waf/dashboard" replace />} />
+          <Route path="dashboard" element={<DurumPaneli />} />
+          <Route path="system" element={<Sistem />} />
+          <Route path="logs" element={<Loglar />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" />} />
@@ -34,4 +34,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

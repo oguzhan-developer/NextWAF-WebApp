@@ -3,7 +3,7 @@
 # --- MySQL Bağlantı Bilgileri ---
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
-MYSQL_HOST="10.211.55.1"
+MYSQL_HOST="10.211.55.5"
 MYSQL_DB="NextWAF"
 MYSQL_TABLE="sistem_monitor"
 

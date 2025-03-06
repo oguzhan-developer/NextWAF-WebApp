@@ -86,9 +86,7 @@ function Loglar() {
     ];
 
     return (
-        <div className="loglar-page">
-            <Header as='h1' className="page-title">Erişim Logları</Header>
-            
+        <div className="loglar-page">            
             <Segment className="component">
                 <div className="table-controls">
                     <div className="left-controls">
@@ -232,6 +230,7 @@ function Loglar() {
                                 <Table.HeaderCell colSpan="8">
                                     <div className="pagination-container">
                                         <Pagination 
+                                            className="inside-pagination"
                                             activePage={activePage}
                                             onPageChange={handlePageChange}
                                             totalPages={totalPages}
@@ -252,7 +251,6 @@ function Loglar() {
     );
 }
 
-// Boyut formatını düzenleme (byte -> KB, MB)
 function formatSize(bytes) {
     if (bytes === 0) return '0 B';
     

@@ -1,5 +1,5 @@
 .loglar-page {
-    margin-top: 4.7rem;
+    margin-top: 6.5rem;
     padding-top: 1rem;
 }
 
@@ -46,6 +46,10 @@
     display: flex;
     justify-content: center;
     margin-top: 1rem;
+}
+
+.inside-pagination{
+    align-items: center;
 }
 
 .method-get {

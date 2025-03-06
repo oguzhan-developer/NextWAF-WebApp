@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürünler Sayfası</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Stili */
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* Ürünler Bölümü */
+        .products-container {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .products-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product-card {
+            flex: 0 0 calc(25% - 15px); /* Bir satırda 4 ürün için %25, gap için boşluk */
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .product-card h3 {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .product-card p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .product-card .price {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+      	.u-name{
+      height=30px !important;
+      }
+
+        /* Footer Stili */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        /* Responsive Tasarım */
+        @media (max-width: 768px) {
+            .product-card {
+                flex: 0 0 calc(50% - 10px); /* Mobilde 2 ürün */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-card {
+                flex: 0 0 100%; /* Çok küçük ekranlarda 1 ürün */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ürünlerimiz</h1>
+    </header>
+
+    <div class="products-container">
+        <div class="products-grid">
+            <!-- Örnek Ürünler -->
+            <div class="product-card">
+                <p class="u-name">Retro baskılı
+              Spor Ayakkabı</p>
+                <div class="price">1300 TL</div>
+            </div>
+                        <div class="product-card">
+                <p class="u-name">Reverse T-Shirt</p>
+                <div class="price">399 TL</div>
+            </div>
+                      <div class="product-card">
+                <p class="u-name">Skater Model Spor Ayakkabı</p>
+                <div class="price">1690 TL</div>
+            </div>
+                                <div class="product-card">
+                <p class="u-name">Alviora Vintage Shirt</p>
+                <div class="price">249 TL</div>
+            </div>
+            <!-- Daha fazla ürün eklenebilir -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Tüm Hakları Saklıdır</p>
+    </footer>
+</body>
+</html>

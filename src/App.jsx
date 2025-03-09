@@ -4,10 +4,11 @@ import Login from './pages/Login/Login';
 import WAFLayout from './pages/WAF/WAFLayout/WAFLayout';
 import DurumPaneli from './pages/WAF/DurumPaneli/DurumPaneli';
 import Sistem from './pages/WAF/Sistem/Sistem';
+import Loglar from './pages/WAF/Loglar/Loglar';
+import IDS from './pages/WAF/IDS/IDS';
 
 import './index.css'
 import { getCookieJSON } from './utils/cookie';
-import Loglar from './pages/WAF/Loglar/Loglar';
 
 function App() {
   const isAuthenticated = () => {
@@ -26,6 +27,7 @@ function App() {
           <Route path="dashboard" element={<DurumPaneli />} />
           <Route path="system" element={<Sistem />} />
           <Route path="logs" element={<Loglar />} />
+          <Route path="ids" element={<IDS />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" />} />

@@ -8,12 +8,19 @@ import i_status from '../../../assets/icons/i_status.svg';
 import i_cpu from '../../../assets/icons/i_cpu.svg';
 import i_logs from '../../../assets/icons/i_logs.svg';
 import i_security from '../../../assets/icons/i_security.svg';
+import i_shield from '../../../assets/icons/i_health.svg';
+import { fetchIsSystemActive } from '../../../utils/api';
 
 function WAFLayout() {
+    const [isSystemActive, setIsSystemActive] = useState(false);
     const [username, setUsername] = useState('');
     const location = useLocation();
 
     useEffect(() => {
+        const load = async () => {
+            setIsSystemActive(await fetchIsSystemActive());
+        }
+        load();
         const user = getCookieJSON("user");
         if (user === null) {
             alert("Sayfayı görüntülemek için giriş yapmalısınız.");
@@ -22,6 +29,10 @@ function WAFLayout() {
             setUsername(user.username);
         }
     }, []);
+
+    useEffect(() => {
+        if (isSystemActive == "Pasif") alert("Sistem İletişimi Pasif, Yöneticinizle iletişime geçiniz!");
+    }, [isSystemActive])
 
     const isActive = (path) => {
         return location.pathname === path;
@@ -34,8 +45,8 @@ function WAFLayout() {
             <div className="page-container">
                 <div className="sidebar">
                     <div className="sidebar-menu">
-                        <Link 
-                            to="/waf/dashboard" 
+                        <Link
+                            to="/waf/dashboard"
                             className={`sidebar-item ${isActive('/waf/dashboard') ? 'active' : ''}`}
                         >
                             <img src={i_status} alt="Durum Paneli" className='icon' />
@@ -50,8 +61,15 @@ function WAFLayout() {
                             <span>Loglar</span>
                         </Link>
                         <Link to="/waf/ids" className={`sidebar-item ${isActive('/waf/ids') ? 'active' : ''}`}>
-                        <img src={i_security} alt="Sızma Girişimleri" className='icon' />
-                        <span>Sızma Girişimleri</span>
+                            <img src={i_security} alt="Sızma Girişimleri" className='icon' />
+                            <span>Sızma Girişimleri</span>
+                        </Link>
+                        <Link
+                            to="/waf/security"
+                            className={`sidebar-item ${isActive('/waf/security') ? 'active' : ''}`}
+                        >
+                            <img src={i_shield} alt="Güvenlik" className='icon' />
+                            <span>Güvenlik</span>
                         </Link>
                         <Link to="#" className="sidebar-item">
                             <Icon name="list" />
@@ -72,5 +90,4 @@ function WAFLayout() {
         </div>
     );
 }
-
 export default WAFLayout;

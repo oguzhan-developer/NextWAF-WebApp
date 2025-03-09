@@ -83,6 +83,12 @@
     margin-bottom: 0.5rem;
 }
 
+.helper {
+    font-weight: 600;
+    cursor: help;
+}
+
+
 .info-box p {
     margin: 0;
 }

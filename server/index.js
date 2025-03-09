@@ -11,7 +11,12 @@ import connection from './db.js';
 const app = express();
 const port = process.env.VITE_APP_API_PORT || 5058;
 
-app.use(cors());
+app.use(cors({
+  exposedHeaders: ['X-Total-Count', 'X-Total-Pages', 'X-Current-Page'],
+  credentials: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
@@ -57,20 +62,10 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// Log API'sini düzenlenmiş hali - sayfalama, arama ve sıralama desteği ile
-app.get('/api/logs', (req, res) => {
-  // URL parametrelerini al
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+app.get('/api/logs-count', (req, res) => {
   const search = req.query.search || '';
-  const sortField = req.query.sortField || 'timestamp';
-  const sortDirection = req.query.sortDirection || 'desc';
   
-  // Sayfalama için offset hesapla
-  const offset = (page - 1) * limit;
-  
-  // Toplam kayıt sayısını al (arama filtresi ile)
-  let countQuery = 'SELECT COUNT(*) as total FROM logs';
+  let countQuery = 'SELECT COUNT(*) as count FROM logs';
   let queryParams = [];
   
   // Arama filtresi varsa SQL sorgusuna ekle
@@ -85,53 +80,56 @@ app.get('/api/logs', (req, res) => {
     queryParams = [searchParam, searchParam, searchParam, searchParam, searchParam];
   }
   
-  // Önce toplam kayıt sayısını bul
-  connection.query(countQuery, queryParams, (err, countResult) => {
+  connection.query(countQuery, queryParams, (err, results) => {
     if (err) {
       console.error('Log sayısını hesaplarken hata oluştu: ', err);
       return res.status(500).json({ success: false, message: 'Sunucu hatası' });
     }
     
-    const total = countResult[0].total;
-    const totalPages = Math.ceil(total / limit);
-    
-    // Ana sorguyu oluştur
-    let query = 'SELECT * FROM logs';
-    
-    // Arama filtresi varsa ekle
-    if (search) {
-      query += ` WHERE 
-        id LIKE ? OR
-        ip_address LIKE ? OR
-        request_method LIKE ? OR
-        request_uri LIKE ? OR
-        user_agent LIKE ?`;
+    res.json({ count: results[0].count });
+  });
+});
+
+// Düzeltilmiş logs endpoint - başlık kullanmayacak, sadece verileri dönecek
+app.get('/api/logs', (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const search = req.query.search || '';
+  const sortField = req.query.sortField || 'timestamp';
+  const sortDirection = req.query.sortDirection || 'desc';
+  
+  // Sayfalama için offset hesapla
+  const offset = (page - 1) * limit;
+  
+  let query = 'SELECT * FROM logs';
+  let queryParams = [];
+  
+  // Arama filtresi varsa ekle
+  if (search) {
+    query += ` WHERE 
+      id LIKE ? OR
+      ip_address LIKE ? OR
+      request_method LIKE ? OR
+      request_uri LIKE ? OR
+      user_agent LIKE ?`;
+    const searchParam = `%${search}%`;
+    queryParams = [searchParam, searchParam, searchParam, searchParam, searchParam];
+  }
+  
+  // Sıralama ve sayfalama ekle
+  query += ` ORDER BY ${connection.escapeId(sortField)} ${sortDirection === 'asc' ? 'ASC' : 'DESC'}`;
+  query += ` LIMIT ? OFFSET ?`;
+  
+  queryParams.push(limit, offset);
+  
+  connection.query(query, queryParams, (err, results) => {
+    if (err) {
+      console.error('Logları çekerken hata oluştu: ', err);
+      return res.status(500).json({ success: false, message: 'Sunucu hatası' });
     }
     
-    // Sıralama ekle
-    query += ` ORDER BY id ${sortDirection === 'asc' ? 'asc' : 'desc'}`;
-    
-    // Sayfalama ekle
-    query += ` LIMIT ? OFFSET ?`;
-    
-    // Sorgu parametrelerine sayfalama parametrelerini ekle
-    queryParams.push(limit, offset);
-    
-    // Sorguyu çalıştır
-    connection.query(query, queryParams, (err, results) => {
-      if (err) {
-        console.error('Logları çekerken hata oluştu: ', err);
-        return res.status(500).json({ success: false, message: 'Sunucu hatası' });
-      }
-      
-      // HTTP başlıklarında sayfalama bilgilerini gönder
-      res.setHeader('X-Total-Count', total);
-      res.setHeader('X-Total-Pages', totalPages);
-      res.setHeader('X-Current-Page', page);
-      
-      // Sonuçları gönder
-      res.json(results);
-    });
+    // Verileri doğrudan gönder (başlık yok)
+    res.json(results || []);
   });
 });
 

@@ -44,8 +44,32 @@
 
 .pagination-container {
     display: flex;
-    justify-content: center;
-    margin-top: 1rem;
+    flex-direction: column;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.pagination-control {
+    align-items: center;
+
+    margin-top: 0.5rem !important;
+}
+
+.ui.pagination.menu .item {
+    min-width: 2.5em !important;
+    text-align: center !important;
+}
+
+.ui.pagination.menu .active.item {
+    background-color: #2185d0 !important;
+    color: white !important;
+    font-weight: bold !important;
 }
 
 .inside-pagination{

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Segment, Header, Table, Button, Icon, Grid, Divider } from 'semantic-ui-react';
-import { fetchIsApacheActive, setApacheStatus, fetchServerIp, fetchOS, fetchOSVersion, fetchApacheVersion, fetchPHPVersion, fetchMySQLVersion, fetchIsSystemActive, fetchIsMySQLActive } from '../../../utils/api.jsx'
+import { Segment, Header, Table, Button, Icon, Grid, Divider, Popup } from 'semantic-ui-react';
+import { fetchIsApacheActive, setApacheStatus, fetchServerIp, fetchOS, fetchOSVersion, fetchApacheVersion, fetchPHPVersion, fetchMySQLVersion, fetchIsMySQLActive, fetchIsSystemActive } from '../../../utils/api.jsx'
 import './Sistem.css';
 
 function Sistem() {
@@ -35,22 +35,14 @@ function Sistem() {
                 setIsApacheActive('Hata');
             }
         };
-
         loadData();
-        if(isSystemActive == "Pasif")alert("Sistem İletişimi Pasif, Yöneticinizle iletişime geçiniz!");
     }, []);
 
-    // Apache durumunu değiştirme fonksiyonu
     const toggleApacheStatus = async () => {
         setLoading(true);
         try {
-            // Mevcut durumun tersini ayarla
             const newStatus = isApacheActive === 'Aktif' ? 'Pasif' : 'Aktif';
-            
-            // API'ye durum değişikliği gönder
             await setApacheStatus(newStatus);
-            
-            // Başarılı olursa state'i güncelle
             setIsApacheActive(newStatus);
         } catch (error) {
             console.error('Apache durumu değiştirilirken hata oluştu:', error);
@@ -63,10 +55,10 @@ function Sistem() {
     const getStatusColor = (status) => {
         if (status === 'Aktif') return 'green';
         if (status === 'Pasif') return 'red';
-        return 'grey'; 
+        return 'grey';
     };
 
-        const getButtonProps = () => {
+    const getButtonProps = () => {
         if (isApacheActive === 'Aktif') {
             return {
                 color: 'red',
@@ -84,26 +76,46 @@ function Sistem() {
 
     const buttonProps = getButtonProps();
 
+
+    function getDescription(type) {
+        const descriptions = {
+            'Web Sunucusu (Apache)': 'NextWAF\'ın koruduğu websitenizin iletişim servisidir.',
+            'Sunucu IP Adresi': 'Müşterilerinizin websitenize erişim sağlayabileceği IP adresi.',
+            'İşletim Sistemi': 'Websitenizi barındıran sunucunun işletim sistemi.',
+            'Kernel Sürümü': 'Websitenizi barındıran sunucunun çekirdek sürümü.',
+            'Apache Sürümü': 'Websitenizin iletişim servisi olan Apache sunucusunun sürümü.',
+            'PHP Sürümü': 'NextWAF\'ın çekirdek iletişiminde kullandığı PHP\'nin sürümü.',
+            'MySQL Servisi': 'Websitenizin veritabanı servisi olan MySQL\'in durumu.',
+            'MySQL Sürümü': 'Websitenizin veritabanı servisi olan MySQL\'in sürümü.',
+            'Sistem İletişim Servisi': 'NextWAF\'ın çekirdek iletişim servisi durumu.'
+        }; //Bir hata durumunda işletim sistemi ve sürümü işe yarar.
+
+        return descriptions[type] || 'açıklama girilmemiş.';
+    }
+
     return (
-        <div className="sistem-page">            
+        <div className="sistem-page">
             <Grid stackable>
                 <Grid.Row>
                     <Grid.Column width={16}>
                         <Segment className="component">
                             <Header as='h2'>Sunucu Servisleri</Header>
                             <Divider />
-                            
+
                             <Table celled className="server-table">
                                 <Table.Body>
                                     <Table.Row>
                                         <Table.Cell width={6} className="service-name">
-                                            Web Sunucusu (Apache)
+                                            <Popup
+                                                content={getDescription("Web Sunucusu (Apache)")}
+                                                trigger={<span className="helper">Web Sunucusu (Apache)</span>}
+                                            />
                                         </Table.Cell>
                                         <Table.Cell width={6}>
                                             <div className="status-container">
                                                 <div className={`status-indicator ${getStatusColor(isApacheActive)}`}></div>
                                                 <span>
-                                                    <strong>Durum: </strong> 
+                                                    <strong>Durum: </strong>
                                                     <span className={`status-text ${getStatusColor(isApacheActive)}`}>
                                                         {isApacheActive}
                                                     </span>
@@ -111,7 +123,7 @@ function Sistem() {
                                             </div>
                                         </Table.Cell>
                                         <Table.Cell width={4} textAlign="center" className="button-cell">
-                                            <Button 
+                                            <Button
                                                 color={buttonProps.color}
                                                 onClick={toggleApacheStatus}
                                                 loading={loading}
@@ -125,18 +137,17 @@ function Sistem() {
                                     </Table.Row>
                                 </Table.Body>
                             </Table>
-                            
-                            <div className="info-box">
-                                {isApacheActive === 'Pasif' && (<p style={{color:"red",fontStyle:"normal"}}>
+
+                            {isSystemActive === "Pasif" || isApacheActive === "Pasif" && <div className="info-box">
+                                {isSystemActive === 'Pasif' && (<p style={{ color: "red", fontStyle: "normal" }}>
+                                    <Icon name="info circle" />
+                                    <strong>Sistem iletişimi Pasif durumda, yöneticinizle iletişime geçiniz!</strong>
+                                </p>)}
+                                {isApacheActive === 'Pasif' && (<p style={{ color: "red", fontStyle: "normal" }}>
                                     <Icon name="info circle" />
                                     Şu an websitenize erişim kapalı! geri açmak için <strong>Aktifleştir</strong>'e basınız.
-                                </p>) }
-                                
-                                <p>
-                                    <Icon name="info circle" />
-                                    NextWAF'ın koruduğu websitenin iletişim servisidir.
-                                </p>
-                            </div>
+                                </p>)}
+                            </div>}
                         </Segment>
                     </Grid.Column>
                 </Grid.Row>
@@ -146,28 +157,50 @@ function Sistem() {
                         <Segment className="component">
                             <Header as='h2'>Sunucu Bilgisi</Header>
                             <Divider />
-                            
-                            <Grid columns={2} stackable style={{justifyContent: 'space-between'}}>
+
+                            <Grid columns={2} stackable style={{ justifyContent: 'space-between' }}>
                                 <Grid.Column>
                                     <Table definition className="info-table">
                                         <Table.Body>
                                             <Table.Row>
-                                                <Table.Cell width={6}>Sunucu IP Adresi</Table.Cell>
+                                                <Table.Cell width={6}>
+                                                    <Popup
+                                                        content={getDescription("Sunucu IP Adresi")}
+                                                        trigger={<span className="helper">Sunucu IP Adresi</span>}
+                                                    />
+
+
+                                                </Table.Cell>
                                                 <Table.Cell><strong>{serverIp}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>İşletim Sistemi</Table.Cell>
+                                                <Table.Cell>
+                                                    <Popup
+                                                        content={getDescription("İşletim Sistemi")}
+                                                        trigger={<span className="helper">İşletim Sistemi</span>}
+                                                    />
+                                                </Table.Cell>
                                                 <Table.Cell><strong>{os}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>Kernel Sürümü</Table.Cell>
+                                                <Table.Cell>
+                                                <Popup
+                                                        content={getDescription("Kernel Sürümü")}
+                                                        trigger={<span className="helper">Kernel Sürümü</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell><strong>{osVersion}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>Sistem İletişim Servisi</Table.Cell>
+                                                <Table.Cell>
+                                                <Popup
+                                                        content={getDescription("Sistem İletişim Servisi")}
+                                                        trigger={<span className="helper">Sistem İletişim Servisi</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell>
                                                     <strong className={`status-text ${getStatusColor(isSystemActive)}`}>
-                                                    {isSystemActive}
+                                                        {isSystemActive}
                                                     </strong>
                                                 </Table.Cell>
                                             </Table.Row>
@@ -178,31 +211,51 @@ function Sistem() {
                                     <Table definition className="info-table">
                                         <Table.Body>
                                             <Table.Row>
-                                                <Table.Cell width={6}>Apache Sürümü</Table.Cell>
+                                                <Table.Cell width={6}>
+                                                <Popup
+                                                        content={getDescription("Apache Sürümü")}
+                                                        trigger={<span className="helper">Apache Sürümü</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell><strong>{apacheVersion}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>PHP Sürümü</Table.Cell>
+                                                <Table.Cell>
+                                                <Popup
+                                                        content={getDescription("PHP Sürümü")}
+                                                        trigger={<span className="helper">PHP Sürümü</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell><strong>{PHPVersion}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>MySQL Servisi</Table.Cell>
+                                                <Table.Cell>
+                                                <Popup
+                                                        content={getDescription("MySQL Servisi")}
+                                                        trigger={<span className="helper">MySQL Servisi</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell><strong className={`status-text ${getStatusColor(isMySQLActive)}`}>
                                                     {isMySQLActive}</strong></Table.Cell>
                                             </Table.Row>
                                             <Table.Row>
-                                                <Table.Cell>MySQL Sürümü</Table.Cell>
+                                                <Table.Cell>
+                                                <Popup
+                                                        content={getDescription("MySQL Sürümü")}
+                                                        trigger={<span className="helper">MySQL Sürümü</span>}
+                                                    />
+                                                    </Table.Cell>
                                                 <Table.Cell><strong>{MySQLVersion}</strong></Table.Cell>
                                             </Table.Row>
                                         </Table.Body>
                                     </Table>
                                 </Grid.Column>
-                                                <div className="info-box-bottom">
-                                                    <p>
-                                                        <Icon name="info circle" />
-                                                        Sistem İletişim Servisi <strong>Pasif</strong> durumunda olduğunda, derhal sunucu yöneticinizle iletişime geçiniz.
-                                                    </p>
-                                                </div>
+                                {isSystemActive === "Aktif" && <div className="info-box-bottom">
+                                    <p>
+                                        <Icon name="info circle" />
+                                        Sistem İletişim Servisi <strong>Pasif</strong> durumunda olduğunda, derhal sunucu yöneticinizle iletişime geçiniz.
+                                    </p>
+                                </div>}
                             </Grid>
                         </Segment>
                     </Grid.Column>

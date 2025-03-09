@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Segment, Header, Grid, Statistic, Icon } from 'semantic-ui-react';
+import { Table, Segment, Header, Grid, Statistic, Icon, Popup, Button } from 'semantic-ui-react';
 import { Line, Pie } from 'react-chartjs-2';
-import { fetchIsApacheActive, fetchIsSystemActive, fetchLogs, fetchOpenPorts, fetchServerIp, fetchServerStats } from '../../../utils/api.jsx';
+import { changeWebServiceStatus, fetchIsApacheActive, fetchIsSystemActive, fetchLogs, fetchOpenPorts, fetchServerIp, fetchServerStats, fethIsHTTPPortActive, fethIsHTTPSPortActive } from '../../../utils/api.jsx';
 import './DurumPaneli.css';
 
-// Chart.js için gerekli tüm bileşenleri import ediyoruz
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -17,7 +16,6 @@ import {
     ArcElement,
 } from 'chart.js';
 
-// Chart.js bileşenlerini kaydet - bu önemli, eksik olursa grafik çalışmaz
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -29,23 +27,11 @@ ChartJS.register(
     ArcElement
 );
 
-// ModernIcon bileşeni - WAF.jsx'ten alındı
-const ModernIcon = ({ name, ...props }) => {
-  const icons = {
-    logs: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c1.1 0-2 .9-2 2zm4 5h10M7 14h10"></path>
-      </svg>
-    ),
-    // diğer ikonlar buraya eklenebilir
-  };
-
-  return icons[name] || null;
-};
-
 function DurumPaneli() {
     const [logs, setLogs] = useState([]);
     const [isSystemActive, setIsSystemActive] = useState('Getiriliyor...');
+    const [isHTTPActive, setIsHTTPActive] = useState('Getiriliyor...');
+    const [isHTTPSActive, setIsHTTPSActive] = useState('Getiriliyor...');
     const [serverIp, setServerIp] = useState('0.0.0.0');
     const [isApacheActive, setIsApacheActive] = useState('Getiriliyor...');
     const [openPorts, setOpenPorts] = useState('Getiriliyor...');
@@ -169,7 +155,6 @@ function DurumPaneli() {
         return { borderColors, backgroundColors };
     };
 
-    // Veri hazırlama fonksiyonları
     const prepareChartData = (dataType) => {
         if (!statsHistory || statsHistory.length === 0) return null;
 
@@ -240,14 +225,17 @@ function DurumPaneli() {
         };
     };
 
-    // Veri yükleme
+    const portActiveStatus = async () => {
+        setIsHTTPActive(await fethIsHTTPPortActive())
+        setIsHTTPSActive(await fethIsHTTPSPortActive())
+    }
+
     useEffect(() => {
         const loadData = async () => {
             try {
-                setIsSystemActive(await fetchIsSystemActive())
-                const logData = await fetchLogs();
-                setLogs(logData);
-
+                setIsSystemActive(await fetchIsSystemActive());
+                portActiveStatus();
+                setLogs(await fetchLogs());
                 const statsData = await fetchServerStats(7);
                 setStatsHistory(statsData);
 
@@ -264,29 +252,21 @@ function DurumPaneli() {
         };
 
         loadData();
-        if(isSystemActive == "Pasif"){
-            alert("Sistem İletişimi Pasif, Yöneticinizle iletişime geçiniz!");
-
-        }
         const intervalId = setInterval(loadData, 60000);
 
         return () => clearInterval(intervalId);
     }, []);
 
-    // Sistem saati için yeni bir useEffect
     useEffect(() => {
-        // Sayfa yüklendiğinde ve her saniye güncellenecek
         const timerID = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
-        // Component unmount olduğunda timer'ı temizle
         return () => {
             clearInterval(timerID);
         };
     }, []);
 
-    // Saati formatla
     const formatSystemTime = () => {
         return currentTime.toLocaleTimeString('tr-TR', {
             hour: '2-digit',
@@ -304,11 +284,26 @@ function DurumPaneli() {
         });
     };
 
+    function getDescription(type) {
+        const descriptions = {
+            'Sistem Saati': 'Sunucunun sistem saatini gösterir. Loglama için önemlidir.',
+            'Web Sunucu Servisi (Apache)': 'Websitenizi barındıran sunucunun iletişim servisi durumu.',
+            'Sistem İletişim Servisi (Nginx)': 'NextWAF\'ın çekirdek iletişim servisi durumu.', 
+            'Sunucu IP Adresi': 'Websitenizin barındırıldığı sunucunun IP adresi.',
+            'Aktif Portlar': 'Sunucunun açık portları. Güvenlik için önemlidir.',
+        }; 
+
+        return descriptions[type] || 'açıklama girilmemiş.';
+    }
+
+    async function changePortStatus (status, port) {
+        await changeWebServiceStatus(status,port);
+        await portActiveStatus();
+    }
+
     return (
         <>
-            {/* RAM, CPU ve Disk grafikleri içeren üst Grid */}
             <Grid columns={3} stackable>
-                {/* RAM Grafiği */}
                 <Grid.Column className='card' style={{ width: '33.33%' }}>
                     <Segment className="stat-panel component">
                         <div className="stat-header">
@@ -441,7 +436,6 @@ function DurumPaneli() {
                 </Grid.Column>
             </Grid>
 
-            {/* Alttaki kısma Sistem Bilgisi kartı gelecek */}
             <Segment className="component system-info-card">
                 <Header as='h2'>
                     <Header.Content>Sistem Bilgisi</Header.Content>
@@ -452,15 +446,30 @@ function DurumPaneli() {
                             <Table celled className="system-table">
                                 <Table.Body>
                                     <Table.Row>
-                                        <Table.Cell className="info-label">Sistem Saati</Table.Cell>
+                                        <Table.Cell className="info-label">
+                                        <Popup
+                                                content={getDescription("Sistem Saati")}
+                                                trigger={<span className="helper">Sistem Saati</span>}
+                                            />
+                                            </Table.Cell>
                                         <Table.Cell>{formatSystemTime()}</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.Cell className="info-label">Web Sunucu Servisi (Apache)</Table.Cell>
+                                        <Table.Cell className="info-label">
+                                        <Popup
+                                                content={getDescription("Web Sunucu Servisi (Apache)")}
+                                                trigger={<span className="helper">Web Sunucu Servisi (Apache)</span>}
+                                            />
+                                            </Table.Cell>
                                         <Table.Cell><span style={{ color: isApacheActive == "Aktif" ? "green" : "red" }}>{isApacheActive}</span></Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.Cell className="info-label">Sistem İletişim Servisi (Nginx)</Table.Cell>
+                                        <Table.Cell className="info-label">
+                                        <Popup
+                                                content={getDescription("Sistem İletişim Servisi (Nginx)")}
+                                                trigger={<span className="helper">Sistem İletişim Servisi (Nginx)</span>}
+                                            />
+                                            </Table.Cell>
                                         <Table.Cell><span style={{ color: isSystemActive == "Aktif" ? "green" : "red" }}>{isSystemActive}</span></Table.Cell>
                                     </Table.Row>
                                 </Table.Body>
@@ -470,12 +479,33 @@ function DurumPaneli() {
                             <Table celled className="system-table">
                                 <Table.Body>
                                     <Table.Row>
-                                        <Table.Cell className="info-label">Sunucu IP Adresi</Table.Cell>
-                                        <Table.Cell>{serverIp? serverIp: "0.0.0.0"}</Table.Cell>
+                                        <Table.Cell className="info-label">
+                                        <Popup
+                                                content={getDescription("Sunucu IP Adresi")}
+                                                trigger={<span className="helper">Sunucu IP Adresi</span>}
+                                            />
+                                            </Table.Cell>
+                                        <Table.Cell>{serverIp ? serverIp : "0.0.0.0"}</Table.Cell>
                                     </Table.Row>
                                     <Table.Row>
-                                        <Table.Cell className="info-label">Aktif Portlar</Table.Cell>
-                                        <Table.Cell>{openPorts}</Table.Cell>
+                                        <Table.Cell className="info-label">
+                                        <Popup
+                                                content={getDescription("Aktif Portlar")}
+                                                trigger={<span className="helper">Aktif Portlar</span>}
+                                            />
+                                            </Table.Cell>
+                                        <Table.Cell>
+                                            <div className='button-div'>
+                                            <Button
+                                             color={ isHTTPActive == "Aktif" ? "green" : "red" } size='small'
+                                             onClick={() => changePortStatus(isHTTPActive,"80")}>
+                                                80 Portu</Button>
+                                            <Button
+                                             color={ isHTTPSActive == "Aktif" ? "green" : "red" }  size='small'
+                                             onClick={() => changePortStatus(isHTTPSActive,"443")}>
+                                                443 Portu</Button>
+                                            </div>
+                                        </Table.Cell>
                                     </Table.Row>
 
                                 </Table.Body>

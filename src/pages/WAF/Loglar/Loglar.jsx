@@ -30,10 +30,15 @@ function Loglar() {
             });
             
             setLogs(response.data || []);
-            setTotalPages(response.totalPages || Math.ceil((response.total || logs.length) / itemsPerPage));
+            
+            const pages = parseInt(response.totalPages || 1);
+            console.log("Toplam sayfa sayısı:", pages);
+            
+            setTotalPages(pages > 0 ? pages : 1);
         } catch (error) {
             console.error('Log verileri yüklenirken hata oluştu:', error);
             setLogs([]);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
@@ -229,16 +234,42 @@ function Loglar() {
                             <Table.Row>
                                 <Table.HeaderCell colSpan="8">
                                     <div className="pagination-container">
+                                        <div className="pagination-info" style={{ marginBottom: '10px' }}>
+                                            Toplam <strong>{totalPages}</strong> sayfa | Şu anki sayfa: <strong>{activePage}</strong>
+                                        </div>
+                                        
                                         <Pagination 
-                                            className="inside-pagination"
+                                            className="pagination-control"
                                             activePage={activePage}
                                             onPageChange={handlePageChange}
                                             totalPages={totalPages}
-                                            ellipsisItem={{ content: <Icon name='ellipsis horizontal' />, icon: true }}
-                                            firstItem={{ content: <Icon name='angle double left' />, icon: true }}
-                                            lastItem={{ content: <Icon name='angle double right' />, icon: true }}
-                                            prevItem={{ content: <Icon name='angle left' />, icon: true }}
-                                            nextItem={{ content: <Icon name='angle right' />, icon: true }}
+                                            boundaryRange={1}
+                                            siblingRange={1}
+                                            ellipsisItem={{ 
+                                                content: <Icon name='ellipsis horizontal' />, 
+                                                icon: true,
+                                                disabled: totalPages <= 3
+                                            }}
+                                            firstItem={{ 
+                                                content: <Icon name='angle double left' />, 
+                                                icon: true,
+                                                disabled: totalPages <= 1 || activePage === 1
+                                            }}
+                                            lastItem={{ 
+                                                content: <Icon name='angle double right' />, 
+                                                icon: true,
+                                                disabled: totalPages <= 1 || activePage === totalPages
+                                            }}
+                                            prevItem={{ 
+                                                content: <Icon name='angle left' />, 
+                                                icon: true,
+                                                disabled: totalPages <= 1 || activePage === 1
+                                            }}
+                                            nextItem={{ 
+                                                content: <Icon name='angle right' />, 
+                                                icon: true,
+                                                disabled: totalPages <= 1 || activePage === totalPages
+                                            }}
                                         />
                                     </div>
                                 </Table.HeaderCell>

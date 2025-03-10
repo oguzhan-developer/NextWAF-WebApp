@@ -62,7 +62,7 @@ insert_log() {
     local referrer=$(escape_string "$7")
     local user_agent=$(escape_string "$8")
 
-    # DDoS durumunda son kaydı kontrol et
+    # Aynı IP, timestamp ve request_uri ile son kaydı kontrol et
     last_log=$(mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -N -e "
     SELECT COUNT(*) FROM $MYSQL_TABLE WHERE ip_address='$ip' AND timestamp='$timestamp' AND request_uri='$uri' 
     ORDER BY id DESC LIMIT 1;")
@@ -201,8 +201,9 @@ tail -f "$LOG_FILE" | while read -r line; do
     [ "$status" = "-" ] && status=0
     [ "$size" = "-" ] && size=0
 
+    # Saldırı kontrolü yap
     check_attacks "$uri" "$ip" "$timestamp" "$user_agent" "$status"
 
+    # Log ekleme işlemini gerçekleştir
     insert_log "$ip" "$timestamp" "$method" "$uri" "$status" "$size" "$referrer" "$user_agent"
 done
-      

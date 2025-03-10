@@ -19,15 +19,17 @@
     height: 1.7rem !important;
     display: flex;
 }
-.refresh-button .icon{
+
+.refresh-button .icon {
     width: 12px !important;
     height: 12px !important;
     position: relative;
     padding-left: 0.5rem !important;
     margin: 0;
     padding: 0;
-}   
-.refresh-button .text{
+}
+
+.refresh-button .text {
     margin-left: -0.4rem !important;
     position: relative;
     padding: 0;
@@ -104,20 +106,23 @@
 }
 
 .status {
+    font-size: small;
     font-weight: 600;
     padding: 0.3rem 0.6rem;
     border-radius: 4px;
     display: inline-block;
 }
 
-.status.blocked {
+.status.unchecked {
     background-color: rgba(219, 40, 40, 0.1);
     color: #db2828;
+    width: 8.17rem;
 }
 
-.status.allowed {
-    background-color: rgba(33, 133, 208, 0.1);
+.status.checked {
+    background-color: rgba(116, 140, 158, 0.1);
     color: #2185d0;
+    width: 7rem;
 }
 
 .attack-type {
@@ -161,6 +166,27 @@
     border-top: 1px solid rgba(34, 36, 38, 0.1);
     display: flex;
     justify-content: center;
+    width: 100%;
+}
+
+.summary-stats .ui.statistics {
+    width: auto !important;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.summary-stats .ui.statistic {
+    margin: 0 3rem !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.summary-stats .ui.statistic .value,
+.summary-stats .ui.statistic .label {
+    width: 100%;
+    text-align: center !important;
 }
 
 /* Responsive düzenlemeler */
@@ -169,8 +195,27 @@
         width: 100%;
         margin-bottom: 1rem !important;
     }
-    
+
     .summary-stats .ui.statistic {
         margin: 0.5rem !important;
     }
+}
+
+.durum-div {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    align-items: stretch;
+    flex-direction: row;
+}
+
+.durum-div .status {
+    display: flex;
+    align-items: center;
+    
+}
+
+.durum-div .btn {
+    font-size: small;
+    margin-left: 0.5rem
 }

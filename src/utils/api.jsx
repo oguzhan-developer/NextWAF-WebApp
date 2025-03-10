@@ -245,22 +245,6 @@ export async function fetchLogs(params = {}) { //from DB
     }
 }
 
-// IDS servislerinin durumunu getir
-export async function fetchIDSServices() {
-    try {
-        // Bu kısmı gerçek API endpoint'iyle değiştirin
-        // Mock veri dönüyoruz şimdilik
-        return {
-            ddos: 'active',
-            xss: 'inactive',
-            sqlinjection: 'active'
-        };
-    } catch (error) {
-        console.error('IDS servisleri alınırken hata oluştu:', error);
-        throw error;
-    }
-}
-
 export const fethIsHTTPPortActive = async () => {
     try {
         const response = await axios.get(`http://${system_ip}:${system_port}/cmd.php`, {
@@ -299,7 +283,20 @@ export const fethIsHTTPSPortActive = async () => {
     }
 };
 
-export const changeWebServiceStatus = async (status, port) => { 
+export const changeIDSLogStatus = async (id, currentStatus) => {
+    try {
+        const response = await axios.post(`http://localhost:${dbPort}/api/idsLogs/${id}/status`,
+            {
+                status: currentStatus ? 0 : 1 //1 ise 0, 0 ise 1 yapması için   
+            });
+
+    } catch (error) {
+        console.error('IDS log durumu değiştirilirken hata oluştu', error);
+        return "İletişim Hatası!"
+    }
+}
+
+export const changeWebServiceStatus = async (status, port) => {
     try {
         const command = (status == "Aktif" ? "remove" : "add") //Aktifse remove ile silecek.
         const response = await axios.get(`http://${system_ip}:${system_port}/cmd.php`, {
@@ -314,55 +311,14 @@ export const changeWebServiceStatus = async (status, port) => {
     }
 };
 
-
-// Güvenlik loglarını getir
-export async function fetchSecurityLogs() {
+export async function fetchIDSLogs() {
     try {
-        // dummydata
-        return [
-            {
-                timestamp: '2023-05-15T10:23:45',
-                ip_address: '192.168.1.105',
-                attack_type: 'SQL Injection',
-                target_url: '/api/users?id=1 OR 1=1',
-                severity: 'high',
-                action: 'blocked'
-            },
-            {
-                timestamp: '2023-05-15T09:17:32',
-                ip_address: '192.168.1.107',
-                attack_type: 'XSS',
-                target_url: '/blog/post?comment=<script>alert("XSS")</script>',
-                severity: 'medium',
-                action: 'blocked'
-            },
-            {
-                timestamp: '2023-05-14T22:45:11',
-                ip_address: '192.168.1.120',
-                attack_type: 'Brute Force',
-                target_url: '/login',
-                severity: 'medium',
-                action: 'blocked'
-            },
-            {
-                timestamp: '2023-05-14T16:30:22',
-                ip_address: '192.168.1.115',
-                attack_type: 'File Inclusion',
-                target_url: '/page?load=../../../etc/passwd',
-                severity: 'high',
-                action: 'blocked'
-            },
-            {
-                timestamp: '2023-05-14T12:10:15',
-                ip_address: '192.168.1.111',
-                attack_type: 'Command Injection',
-                target_url: '/search?q=test;cat /etc/passwd',
-                severity: 'high',
-                action: 'blocked'
-            },
-        ];
+        const response = await axios.get(`http://localhost:${dbPort}/api/idsLogs`);
+        console.log(response.data);
+
+        return response.data.logs;
     } catch (error) {
-        console.error('Güvenlik logları alınırken hata oluştu:', error);
+        console.error('Logları çekerken hata oluştu:', error);
         throw error;
     }
 }

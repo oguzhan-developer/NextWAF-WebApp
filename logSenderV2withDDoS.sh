@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# MySQL/MariaDB Bağlantı Bilgileri
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
 MYSQL_HOST="10.211.55.5"
@@ -8,13 +7,10 @@ MYSQL_DB="NextWAF"
 MYSQL_TABLE="logs"
 IDS_TABLE="idsLogs"
 
-# Log dosyası konumu
 LOG_FILE="/var/log/apache2/access.log"
 
-# Geçici dosya (IP istek sayısını takip için)
 TEMP_FILE="/tmp/ddos_check"
 
-# Log tablosunu oluşturma fonksiyonu
 setup_table() {
     mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -e "
     CREATE TABLE IF NOT EXISTS $MYSQL_TABLE (
@@ -31,7 +27,6 @@ setup_table() {
     [ $? -eq 0 ] && echo "Tablo kontrol edildi/oluşturuldu: $MYSQL_TABLE" || { echo "Tablo oluşturulamadı!"; exit 1; }
 }
 
-# IDS tablosunu oluşturma fonksiyonu
 setup_ids_table() {
     mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -e "
     CREATE TABLE IF NOT EXISTS $IDS_TABLE (
@@ -41,17 +36,16 @@ setup_ids_table() {
         ip_address VARCHAR(15),
         request_uri VARCHAR(255),
         user_agent VARCHAR(255),
-        status_code INT
+        status_code INT,
+        checked BOOLEAN DEFAULT FALSE
     );"
     [ $? -eq 0 ] && echo "IDS tablosu kontrol edildi/oluşturuldu: $IDS_TABLE" || { echo "IDS tablosu oluşturulamadı!"; exit 1; }
 }
 
-# Verileri escape eden fonksiyon
 escape_string() {
     printf '%s' "$1" | sed "s/'/''/g"
 }
 
-# Log ekleme fonksiyonu
 insert_log() {
     local ip=$(escape_string "$1")
     local timestamp=$(escape_string "$2")
@@ -62,7 +56,6 @@ insert_log() {
     local referrer=$(escape_string "$7")
     local user_agent=$(escape_string "$8")
 
-    # Aynı IP, timestamp ve request_uri ile son kaydı kontrol et
     last_log=$(mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -N -e "
     SELECT COUNT(*) FROM $MYSQL_TABLE WHERE ip_address='$ip' AND timestamp='$timestamp' AND request_uri='$uri' 
     ORDER BY id DESC LIMIT 1;")
@@ -101,7 +94,6 @@ insert_ids_log() {
 
         [ $? -eq 0 ] && echo "Saldırı tespit edildi ve kaydedildi: $attack_type - $ip - $uri" || echo "IDS log eklenemedi!"
     else
-        # Sadece son DDoS kaydının timestamp'ini kontrol et
         last_timestamp=$(mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -N -e "
         SELECT timestamp FROM $IDS_TABLE WHERE ip_address='$ip' AND attack_type='DDoS' 
         ORDER BY id DESC LIMIT 1;")
@@ -128,17 +120,14 @@ check_attacks() {
     local user_agent="$4"
     local status="$5"
 
-    # XSS kontrolü
     if echo "$uri" | grep -iE "(<script|alert\(|document\.cookie|xss|console\.log)"; then
         insert_ids_log "$timestamp" "XSS" "$ip" "$uri" "$user_agent" "$status"
     fi
 
-    # SQL Injection kontrolü
     if echo "$uri" | grep -iE "(select.*from|union.*select|drop.*table|1=1|--|'|%27)"; then
         insert_ids_log "$timestamp" "SQL Injection" "$ip" "$uri" "$user_agent" "$status"
     fi
 
-    # File Inclusion kontrolü
     if echo "$uri" | grep -iE "(\.\./|\.\.%2f|etc/passwd|php://|file://)"; then
         insert_ids_log "$timestamp" "File Inclusion" "$ip" "$uri" "$user_agent" "$status"
     fi
@@ -147,23 +136,23 @@ check_attacks() {
     request_count=$(grep -c "$ip" "$TEMP_FILE")
     if [ "$request_count" -gt 20 ]; then  # 1 dakikada 20 istek
         insert_ids_log "$timestamp" "DDoS" "$ip" "$uri" "$user_agent" "$status"
-        echo "DDoS şüphesi: $ip - $request_count istek"
+        echo "DDoS saldırısı: $ip - $request_count istek"
     fi
 }
 
-echo "MariaDB bağlantısı test ediliyor..."
+echo "Veritabanı bağlantısı test ediliyor..."
 mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -e "SELECT 1;" 2>&1
-[ $? -ne 0 ] && { echo "MariaDB’ye bağlanılamadı!"; exit 1; }
+[ $? -ne 0 ] && { echo "Veritabanına bağlanılamadı!"; exit 1; }
 
 setup_table
 setup_ids_table
 
-# Her dakika TEMP_FILE’ı sıfırlama - DDoS kontrolü için
+# DDoS kontrolü için her dakika sıfırlanıyor.
 (while true; do sleep 60; > "$TEMP_FILE"; done) &
 
 echo "Apache access.log izleniyor: $LOG_FILE"
 tail -f "$LOG_FILE" | while read -r line; do
-    echo "Yeni satır algılandı: $line"
+    echo "$line"
     ip=$(echo "$line" | awk '{print $1}')
     raw_time=$(echo "$line" | grep -oP '\[\K[^\]]+' || echo "")
     if [ -n "$raw_time" ]; then
@@ -194,16 +183,14 @@ tail -f "$LOG_FILE" | while read -r line; do
     [ -z "$user_agent" ] || [ "$user_agent" = "\"" ] && user_agent="-"
 
     if [ "$method" = "-" ] && [ "$uri" = "-" ] && [ "$status" = "-" ] && [ "$size" = "-" ] && [ "$referrer" = "-" ] && [ "$user_agent" = "-" ]; then
-        echo "Boş log atlandı: $ip - $timestamp"
+        echo "$ip - $timestamp"
         continue
     fi
 
     [ "$status" = "-" ] && status=0
     [ "$size" = "-" ] && size=0
 
-    # Saldırı kontrolü yap
     check_attacks "$uri" "$ip" "$timestamp" "$user_agent" "$status"
 
-    # Log ekleme işlemini gerçekleştir
     insert_log "$ip" "$timestamp" "$method" "$uri" "$status" "$size" "$referrer" "$user_agent"
 done

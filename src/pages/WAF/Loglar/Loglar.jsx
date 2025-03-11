@@ -63,9 +63,8 @@ function Loglar() {
         setActivePage(1);
     };
 
-    // Dropdown değişikliği için handler fonksiyonu
     const handleItemsPerPageChange = (e, data) => {
-        console.log("Dropdown değişti:", data.value); // Debug için
+        console.log("Dropdown değişti:", data.value);
         setItemsPerPage(data.value);
         setActivePage(1);
     };

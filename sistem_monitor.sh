@@ -1,18 +1,14 @@
 #!/bin/bash
 
-# --- MySQL Bağlantı Bilgileri ---
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
 MYSQL_HOST="10.211.55.5"
 MYSQL_DB="NextWAF"
 MYSQL_TABLE="sistem_monitor"
 
-# Veritabanı ve tablo kontrolü/oluşturma
 setup_database() {
-    # Veritabanını oluştur (yoksa)
     mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DB;"
     
-    # Tabloyu oluştur (yoksa) - SQL sentaksı düzeltildi: currentTimeSTAMP -> CURRENT_TIMESTAMP
     mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -e "
     CREATE TABLE IF NOT EXISTS $MYSQL_TABLE (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +30,6 @@ setup_database() {
     fi
 }
 
-# Veri ekle
 mysql_insert() {
     mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -h$MYSQL_HOST $MYSQL_DB -e "
     INSERT INTO $MYSQL_TABLE (
@@ -55,57 +50,42 @@ mysql_insert() {
 }
 
 
-# Veritabanı ve tabloyu hazırla
 setup_database
 
-echo "Sistem Monitörü"
-echo "Veriler MySQL veritabanına kaydediliyor..."
+echo "Veriler veritabanına kaydediliyor..."
 echo "----------------------------------------"
 
 while true; do
-    # Zaman bilgisi
     currentTime=$(date '+%Y-%m-%d %H:%M:%S')
     echo -e "\n$currentTime"
     echo "----------------------------------------"
     
-    # RAM bilgileri
     totalRAM=$(free -m | grep Mem | awk '{print $2}')
     usingRAM=$(free -m | grep Mem | awk '{print $3}')
     RAMKYuzde=$(free | grep Mem | awk '{printf("%.2f"), $3/$2*100}')
     
-    # CPU kullanım yüzdesini hesapla - yeni komut kullanımı
-    # Doğrudan "top" komutunu kullanarak CPU kullanım yüzdesini hesapla:
-    # $2 (us: user CPU time) + $4 (sy: system CPU time) toplamı
     usingCPUYuzde=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
     
-    # CPU çekirdek sayısı ve toplam CPU kapasitesi
     cpu_cores=$(grep -c ^processor /proc/cpuinfo)
     
-    # Toplam CPU kapasitesi (çekirdek sayısı * frekans)
     totalCPU=$(awk -v cores="$cpu_cores" 'BEGIN {printf "%.2f", cores}')
     
-    # Kullanılan CPU miktarı (toplam kapasite * kullanım yüzdesi / 100)
     usingCPU=$(awk -v total="$totalCPU" -v usage="$usingCPUYuzde" 'BEGIN {printf "%.2f", total * usage / 100}')
     
-    # Disk bilgileri
     df_output=$(df -h / | tail -n 1)
-    # G harfini kaldırıyoruz
     total_disk=$(echo "$df_output" | awk '{print $2}' | sed 's/G$//')
     used_disk=$(echo "$df_output" | awk '{print $3}' | sed 's/G$//')
     disk_usage_percentage=$(echo "$df_output" | awk '{print $5}' | sed 's/%//g')
     
-    # Ekranda göster
     echo "RAM: $usingRAM/$totalRAM MB ($RAMKYuzde%)"
     echo "CPU: $usingCPU/$totalCPU CPU ($usingCPUYuzde%)"
     echo "Disk: $used_disk/$total_disk (${disk_usage_percentage}%)"
     
-    # Verileri MySQL'e aktar
     mysql_insert "$totalRAM" "$usingRAM" "$RAMKYuzde" \
                 "$totalCPU" "$usingCPU" "$usingCPUYuzde" \
                 "$total_disk" "$used_disk" "$disk_usage_percentage"
     
     echo "----------------------------------------"
     
-    # Bekleme süresi
     sleep 60
 done

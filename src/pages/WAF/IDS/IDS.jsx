@@ -32,10 +32,10 @@ function IDS() {
 
     // HTTP koduna göre renk ayarlaması (css class)
     const getStatusColor = (status) => {
-        if (status >= 500) return 'error-status'; 
-        if (status >= 400) return 'warning-status'; 
-        if (status >= 300) return 'redirect-status'; 
-        if (status >= 200) return 'success-status'; 
+        if (status >= 500) return 'error-status';
+        if (status >= 400) return 'warning-status';
+        if (status >= 300) return 'redirect-status';
+        if (status >= 200) return 'success-status';
         return '';
     };
 
@@ -44,7 +44,7 @@ function IDS() {
             <Segment className="component">
                 <div className="log-header">
                     <Header as="h2">Güvenlik İhlal Logları</Header>
-                    <Button
+                    {/* <Button
                         icon
                         primary
                         onClick={loadLogs}
@@ -53,7 +53,11 @@ function IDS() {
                     >
                         <span className='text'>Yenile</span>
                         <Icon name='refresh' className='icon' />
-                    </Button>
+                    </Button> */}
+                    <button className="ui button primary" onClick={loadLogs}>
+                        <Icon name="refresh" />
+                        Yenile
+                    </button>
                 </div>
                 <Divider />
                 <p className="section-description">
@@ -119,15 +123,15 @@ function IDS() {
                                                 {log.user_agent}
                                             </div>
                                         </Table.Cell>
-                                        <Table.Cell className={log.checked? "" : "negative"}>
+                                        <Table.Cell className={log.checked ? "" : "negative"}>
                                             <div className='durum-div'>
-                                            <span className={`status ${log.checked ? 'checked' : 'unchecked'}`}>
-                                                {log.checked ? "Kontrol edildi" : "Kontrol edilmedi"}
-                                            </span>
-                                            {!log.checked && <Button size='small' className='btn'
-                                            onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}
-                                            >Tamamla</Button>}
-                                            
+                                                <span className={`status ${log.checked ? 'checked' : 'unchecked'}`}>
+                                                    {log.checked ? "Kontrol edildi" : "Kontrol edilmedi"}
+                                                </span>
+                                                {!log.checked && <Button size='small' className='btn'
+                                                    onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}
+                                                >Tamamla</Button>}
+
                                             </div>
                                         </Table.Cell>
                                     </Table.Row>

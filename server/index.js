@@ -8,8 +8,56 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, "../.env") });
 import connection from "./db.js";
+import { sendIDSAlertEmail } from "../src/utils/email.js";
 const app = express();
 const port = process.env.VITE_APP_API_PORT || 5058;
+
+let lastCheckedIDSLogId = 0;
+//en son logid tutulacak, daha büyük logid geldiğinde, o alınır ve mail atılır.
+
+const initializeLastCheckedLogId = () => {
+  connection.query("SELECT MAX(id) as maxId FROM idsLogs", (err, results) => {
+    if (err) {
+      console.error("idsLogs dan maxid alınırken hata oluştu:", err);
+      return;
+    }
+    if (results && results[0] && results[0].maxId) {
+      lastCheckedIDSLogId = results[0].maxId;
+      console.log(
+        `Son Kontrol edilen id: ${lastCheckedIDSLogId} (LastCheckedLogId)`
+      );
+    }
+  });
+};
+
+const checkNewIDSLogs = () => {
+  const query = `SELECT * FROM idsLogs WHERE id > ? ORDER BY id ASC`;
+
+  connection.query(query, [lastCheckedIDSLogId], async (err, results) => {
+    if (err) {
+      console.error("Yeni IDS Logu kontrol edilirken hata oluştu: ", err);
+      return;
+    }
+
+    if (results && results.length > 0) {
+      console.log(`${results.length} yeni log bulundu.`);
+
+      lastCheckedIDSLogId = Math.max(...results.map((log) => log.id));
+
+      for (const log of results) {
+        try {
+          const emailSent = await sendIDSAlertEmail(log);
+          console.log(`#${log.id} idli log epostaya gönderildi: ${emailSent}`);
+        } catch (error) {
+          console.error(
+            `#${log.id} idli log gönderilirken hata oluştu:`,
+            error
+          );
+        }
+      }
+    }
+  });
+};
 
 app.use(
   cors({
@@ -73,7 +121,6 @@ app.get("/api/logs-count", (req, res) => {
   let countQuery = "SELECT COUNT(*) as count FROM logs";
   let queryParams = [];
 
-  // Arama filtresi varsa SQL sorgusuna ekle
   if (search) {
     countQuery += ` WHERE 
       id LIKE ? OR
@@ -101,7 +148,6 @@ app.get("/api/logs-count", (req, res) => {
   });
 });
 
-// Düzeltilmiş logs endpoint - başlık kullanmayacak, sadece verileri dönecek
 app.get("/api/logs", (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -109,13 +155,11 @@ app.get("/api/logs", (req, res) => {
   const sortField = req.query.sortField || "timestamp";
   const sortDirection = req.query.sortDirection || "desc";
 
-  // Sayfalama için offset hesapla
   const offset = (page - 1) * limit;
 
   let query = "SELECT * FROM logs";
   let queryParams = [];
 
-  // Arama filtresi varsa ekle
   if (search) {
     query += ` WHERE 
       id LIKE ? OR
@@ -133,7 +177,6 @@ app.get("/api/logs", (req, res) => {
     ];
   }
 
-  // Sıralama ve sayfalama ekle
   query += ` ORDER BY ${connection.escapeId(sortField)} ${
     sortDirection === "asc" ? "ASC" : "DESC"
   }`;
@@ -147,7 +190,6 @@ app.get("/api/logs", (req, res) => {
       return res.status(500).json({ success: false, message: "Sunucu hatası" });
     }
 
-    // Verileri doğrudan gönder (başlık yok)
     res.json(results || []);
   });
 });
@@ -163,17 +205,65 @@ app.get("/api/server-stats", (req, res) => {
     res.json({ success: true, stats: results });
   });
 });
+app.post("/api/send-test-email", async (req, res) => {
+  try {
+    const testLog = {
+      id: 1,
+      timestamp: new Date().toISOString(),
+      ip_address: "192.168.1.1",
+      request_uri: "/admin/config?id=1' OR '1'='1",
+      attack_type: "TEST",
+      status_code: 403,
+      user_agent:
+        "Test E-Posta",
+    };
+
+    const emailSent = await sendIDSAlertEmail(testLog);
+
+    if (emailSent) {
+      res.json({
+        success: true,
+        message: "Test e-postası başarıyla gönderildi.",
+      });
+    } else {
+      res.json({
+        success: false,
+        message: "E-posta gönderilemedi, lütfen logları kontrol edin!",
+      });
+    }
+  } catch (error) {
+    const message = "E-posta gönderilirken bir hata oluştu: " + error.message;
+    console.error(message);
+    res.status(500).json({
+      success: false,
+      message,
+    });
+  }
+});
 
 app.get("/api/idsLogs", (req, res) => {
   const query = `select * FROM idsLogs`;
   connection.query(query, (err, results) => {
     if (err) {
-      console.log("IDS Logları çekilirken hata oluştu: ", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "IDS Logs Çekilemedi." });
+      const message = "IDS logları çekilirken hata oluştu " + err.message;
+      console.log(message);
+      return res.status(500).json({ success: false, message });
     }
     res.json({ success: true, logs: results });
+  });
+});
+
+app.delete("/api/idsLogs/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = `DELETE FROM idsLogs WHERE id = ?`;
+  connection.query(query, [id], (err, results) => {
+    if (err) {
+      const message = "IDS logu silinirken hata oluştu." + err.message;
+      console.log(message);
+      return res.status(500).json({ success: false, message });
+    }
+    res.json({ success: true, message: "Log silindi." });
   });
 });
 
@@ -182,17 +272,21 @@ app.post("/api/idsLogs/:id/status", (req, res) => {
   const { status } = req.body;
 
   const query = `UPDATE idsLogs SET checked = ? WHERE id = ?`;
-  connection.query(query, [status, id] ,(err, results) => {
+  connection.query(query, [status, id], (err, results) => {
     if (err) {
-      console.log("IDS log durumu değiştirilirken hata oluştu. ", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "IDS Log durumu değiştirilemedis" });
+      const message =
+        "IDS log durumu değiştirilirken hata oluştu." + err.message;
+      console.log(message);
+      return res.status(500).json({ success: false, message });
     }
     res.json({ success: true, message: "Log durumu değiştirildi." });
   });
 });
 
+initializeLastCheckedLogId();
+
+//ids logu geldiğinde mail göndermek için, yarım dakikada bir kontrol.
+setInterval(checkNewIDSLogs, 30000);
 app.listen(port, () => {
   console.log(`Sunucu ${port} portunda dinleniyor...`);
 });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Segment, Header, Table, Pagination, Input, Dropdown, Icon, Divider, Button } from 'semantic-ui-react';
+import { Segment, Header, Table, Pagination, Dropdown, Icon, Divider, Button } from 'semantic-ui-react';
 import { fetchLogs } from '../../../utils/api.jsx';
 import './Loglar.css';
 import i_search from "../../../assets/icons/i_search.svg";
@@ -70,8 +70,19 @@ function Loglar() {
     };
 
     const formatDateTime = (timestamp) => {
+        // Tarih nesnesini oluştur
         const date = new Date(timestamp);
-        return date.toLocaleString('tr-TR');
+        
+        // Tarih yerel saat dilimine göre ayarlanıyor
+        return new Intl.DateTimeFormat('tr-TR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(date);
     };
 
     const getStatusColor = (status) => {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import './WAFLayout.css'
-import { Icon } from 'semantic-ui-react';
 import Menu from '../../../components/Menu/Menu';
 import { getCookieJSON } from '../../../utils/cookie';
 import i_status from '../../../assets/icons/i_status.svg';
@@ -64,25 +63,9 @@ function WAFLayout() {
                             <img src={i_security} alt="Sızma Girişimleri" className='icon' />
                             <span>Sızma Girişimleri</span>
                         </Link>
-                        <Link
-                            to="/waf/security"
-                            className={`sidebar-item ${isActive('/waf/security') ? 'active' : ''}`}
-                        >
-                            <img src={i_shield} alt="Güvenlik" className='icon' />
-                            <span>Güvenlik</span>
-                        </Link>
-                        <Link to="#" className="sidebar-item">
-                            <Icon name="list" />
-                            <span>Kurallar</span>
-                        </Link>
-                        <Link to="#" className="sidebar-item">
-                            <Icon name="settings" />
-                            <span>Ayarlar</span>
-                        </Link>
                     </div>
                 </div>
 
-                {/* Ana İçerik - Outlet ile alt route'ların içeriği burada gösterilir */}
                 <div className="main-content">
                     <Outlet />
                 </div>

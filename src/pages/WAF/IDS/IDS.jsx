@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup } from 'semantic-ui-react';
-import { changeIDSLogStatus, fetchIDSLogs } from '../../../utils/api';
+import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog, sendTestIDSMail } from '../../../utils/api';
 import './IDS.css';
 
 function IDS() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sendingMail, setSendingMail] = useState(false);
+    const [emailStatus, setEmailStatus] = useState(null);
 
     useEffect(() => {
         loadLogs();
@@ -25,9 +27,38 @@ function IDS() {
         }
     };
 
+    const sendTestMail = async () => {
+        setSendingMail(true);
+        try {
+            const result = await sendTestIDSMail();
+            setEmailStatus(result);
+            if (result.success) {
+                alert("Test e-postası başarıyla gönderildi!");
+            } else {
+                alert(`Hata: ${result.message}`);
+            }
+        } catch (error) {
+            alert("Mail gönderilirken hata oluştu: " + (error.message || "Bilinmeyen hata"));
+            setEmailStatus({ success: false, message: error.message });
+        } finally {
+            setSendingMail(false);
+        }
+    };
+
     const formatDateTime = (timestamp) => {
+        // Tarih nesnesini oluştur
         const date = new Date(timestamp);
-        return date.toLocaleString('tr-TR');
+        
+        // Tarih yerel saat dilimine göre ayarlanıyor
+        return new Intl.DateTimeFormat('tr-TR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        }).format(date);
     };
 
     // HTTP koduna göre renk ayarlaması (css class)
@@ -44,22 +75,33 @@ function IDS() {
             <Segment className="component">
                 <div className="log-header">
                     <Header as="h2">Güvenlik İhlal Logları</Header>
-                    {/* <Button
-                        icon
-                        primary
-                        onClick={loadLogs}
-                        loading={loading}
-                        className='refresh-button'
-                    >
-                        <span className='text'>Yenile</span>
-                        <Icon name='refresh' className='icon' />
-                    </Button> */}
-                    <button className="ui button primary" onClick={loadLogs}>
-                        <Icon name="refresh" />
-                        Yenile
-                    </button>
+                    <div>
+                        <Button
+                            primary
+                            onClick={loadLogs}
+                            loading={loading}
+                            style={{ marginRight: '10px' }}
+                        >
+                            <Icon name="refresh" />
+                            Yenile
+                        </Button>
+                        <Button 
+                            color="teal"
+                            onClick={sendTestMail}
+                            loading={sendingMail}
+                        >
+                            <Icon name="mail" />
+                            Test E-postası Gönder
+                        </Button>
+                    </div>
                 </div>
                 <Divider />
+                {emailStatus && !emailStatus.success && (
+                    <div className="email-error-message">
+                        <Icon name="warning" color="red" />
+                        <span>E-posta yapılandırması hatalı. Lütfen .env dosyasındaki SMTP ayarlarını kontrol ediniz.</span>
+                    </div>
+                )}
                 <p className="section-description">
                     Tespit edilen saldırılara ait kayıtlar.
                 </p>
@@ -128,9 +170,12 @@ function IDS() {
                                                 <span className={`status ${log.checked ? 'checked' : 'unchecked'}`}>
                                                     {log.checked ? "Kontrol edildi" : "Kontrol edilmedi"}
                                                 </span>
-                                                {!log.checked && <Button size='small' className='btn'
-                                                    onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}
-                                                >Tamamla</Button>}
+
+                                                {
+                                                    log.checked ?
+                                                     (<Button size='small' className='btn basic red' onClick={() => removeIDSLog(log.id).then(loadLogs)}>Kaldır</Button>) : 
+                                                     (<Button size='small' className='btn basic black'onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}>Tamamla</Button>)
+                                                }
 
                                             </div>
                                         </Table.Cell>

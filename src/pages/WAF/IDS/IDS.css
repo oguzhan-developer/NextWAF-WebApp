@@ -219,3 +219,16 @@
     font-size: small;
     margin-left: 0.5rem
 }
+
+.email-error-message {
+    margin: 10px 0;
+    padding: 10px 15px;
+    background-color: #fff8f8;
+    color: #db2828;
+    border-left: 3px solid #db2828;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+}

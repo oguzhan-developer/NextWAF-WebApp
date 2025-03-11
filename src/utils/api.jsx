@@ -282,6 +282,16 @@ export const fethIsHTTPSPortActive = async () => {
         throw error;
     }
 };
+export const removeIDSLog = async (id) => {
+    try {
+        const response = await axios.delete(`http://localhost:${dbPort}/api/idsLogs/${id}`);
+        return response.data;
+    } catch (error) {
+        const message = 'IDS logu silinirken hata oluştu';
+        console.error(message, error);
+        return message;
+    }
+}
 
 export const changeIDSLogStatus = async (id, currentStatus) => {
     try {
@@ -322,6 +332,28 @@ export async function fetchIDSLogs() {
         throw error;
     }
 }
+
+// E-posta bağlantısını test et
+export async function testEmailConnection() {
+    try {
+        const response = await axios.get(`http://localhost:${dbPort}/api/test-email`);
+        return response.data;
+    } catch (error) {
+        console.error('E-posta testi başarısız:', error);
+        return { success: false, message: 'Sunucu ile iletişim kurulamadı' };
+    }
+}
+
+export async function sendTestIDSMail() {
+    try {
+        const response = await axios.post(`http://localhost:${dbPort}/api/send-test-email`);
+        return response.data;
+    } catch (error) {
+        console.error('Test mail gönderilirken hata oluştu:', error);
+        throw error;
+    }
+}
+
 
 
 

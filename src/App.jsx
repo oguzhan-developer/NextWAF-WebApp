@@ -6,6 +6,8 @@ import DurumPaneli from './pages/WAF/DurumPaneli/DurumPaneli';
 import Sistem from './pages/WAF/Sistem/Sistem';
 import Loglar from './pages/WAF/Loglar/Loglar';
 import IDS from './pages/WAF/IDS/IDS';
+import Profiles from './pages/WAF/Profiles/Profiles';
+import EditProfile from './pages/WAF/Profiles/EditProfile';
 
 import './index.css'
 import { getCookieJSON } from './utils/cookie';
@@ -28,6 +30,9 @@ function App() {
           <Route path="system" element={<Sistem />} />
           <Route path="logs" element={<Loglar />} />
           <Route path="ids" element={<IDS />} />
+          <Route path="profiles" element={<Profiles />} />
+          <Route path="profiles/edit/:id" element={<EditProfile />} />
+          <Route path="profiles/new" element={<EditProfile />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" />} />

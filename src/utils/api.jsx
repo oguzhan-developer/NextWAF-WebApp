@@ -354,6 +354,60 @@ export async function sendTestIDSMail() {
     }
 }
 
+// Profilleri getir
+export const fetchUsers = async () => {
+    try {
+        const response = await axios.get(`http://localhost:${dbPort}/api/users`);
+        return response.data.users;
+    } catch (error) {
+        console.error('Kullanıcılar getirilirken hata oluştu:', error);
+        throw error;
+    }
+};
+
+export const fetchProfileDetails = async (id) => {
+    try {
+        const response = await axios.get(`http://localhost:${dbPort}/api/users/${id}`);
+        return response.data.user;
+    } catch (error) {
+        console.error('Profil detayı getirilirken hata oluştu:', error);
+        throw error;
+    }
+};
+
+// Profil güncelle
+export const updateProfile = async (id, profileData) => {
+    try {
+        const response = await axios.put(`http://localhost:${dbPort}/api/users/${id}`, profileData);
+        return response.data;
+    } catch (error) {
+        console.error('Profil güncellenirken hata oluştu:', error);
+        throw error;
+    }
+};
+
+// Yeni profil oluştur
+export const createProfile = async (profileData) => {
+    try {
+        const response = await axios.post(`http://localhost:${dbPort}/api/users`, profileData);
+        return response.data;
+    } catch (error) {
+        console.error('Profil oluşturulurken hata oluştu:', error);
+        throw error;
+    }
+};
+
+// Kullanıcı sil
+export const deleteUser = async (id) => {
+    try {
+        const response = await axios.delete(`http://localhost:${dbPort}/api/users/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Kullanıcı silinirken hata oluştu:', error);
+        throw error;
+    }
+};
+
 
 
 

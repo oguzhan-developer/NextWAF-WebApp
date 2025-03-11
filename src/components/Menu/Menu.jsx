@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Menu.css';
 import { getCookieJSON, removeCookie } from '../../utils/cookie';
 import i_profile from "../../assets/icons/i_profile.svg";
@@ -52,13 +53,13 @@ function Menu() {
                     <img src={i_arrow_down} style={{width:"13px", marginLeft:"0.15rem"}} />
                     {dropdownOpen && (
                         <div className="dropdown-content">
-                            <div className="dropdown-item">
-                            <img src={i_profiles} className='menu_icon' />
-                            Profiller
-                            </div>
+                            <Link to="/waf/profiles" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                <img src={i_profiles} className='menu_icon' />
+                                Profiller
+                            </Link>
                             <div className="dropdown-item" onClick={handleLogout}>
-                            <img src={i_logout} className='menu_icon' />
-                            Güvenli Çıkış Yap
+                                <img src={i_logout} className='menu_icon' />
+                                Güvenli Çıkış Yap
                             </div>
                         </div>
                     )}

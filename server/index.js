@@ -103,6 +103,13 @@ app.post("/api/login", (req, res) => {
     }
 
     if (results.length > 0) {
+      const updateQuery = `UPDATE users SET son_giris = CURRENT_TIMESTAMP WHERE username = ?`;
+      connection.query(updateQuery, [username], (updateErr) => {
+        if (updateErr) {
+          console.error("Son giriş zamanı güncellenirken hata oluştu: ", updateErr);
+        }
+      });
+
       res.json({ success: true, username: username });
     } else {
       console.log("resultss: ", results);
@@ -112,6 +119,94 @@ app.post("/api/login", (req, res) => {
         message: "Geçersiz kullanıcı adı veya şifre",
       });
     }
+  });
+});
+
+app.get("/api/users", (req, res) => {
+  // const query = `SELECT id, username, email, full_name, role, son_giris FROM users`;
+  const query = `SELECT * FROM users`;
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Kullanıcılar çekilirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    res.json({ success: true, users: results });
+  });
+});
+
+app.get("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+  const query = `SELECT * FROM users WHERE id = ?`;
+  connection.query(query, [id], (err, results) => {
+    if (err) {
+      console.error("Kullanıcı çekilirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    if (results.length > 0) {
+      res.json({ success: true, user: results[0] });
+    } else {
+      res.status(404).json({ success: false, message: "Kullanıcı bulunamadı" });
+    }
+  });
+});
+
+// Profil güncelleme endpoint'i
+app.put("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+  const { username, email, full_name, role, password } = req.body;
+  
+  let query, params;
+  
+  if (password) {
+    query = `UPDATE users SET username = ?, email = ?, full_name = ?, password = ? WHERE id = ?`;
+    params = [username, email, full_name, password, id];
+  } else {
+    query = `UPDATE users SET username = ?, email = ?, full_name = ?, WHERE id = ?`;
+    params = [username, email, full_name, id];
+  }
+  
+  connection.query(query, params, (err, results) => {
+    if (err) {
+      console.error("Profil güncellenirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    res.json({ success: true, message: "Profil başarıyla güncellendi" });
+  });
+});
+
+// Yeni profil oluşturma endpoint
+app.post("/api/users", (req, res) => {
+  const { username, email, full_name, role, password } = req.body;
+  
+  const query = `INSERT INTO users (username, email, full_name, password, olusturulma) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`;
+  connection.query(query, [username, email, full_name, password], (err, results) => {
+    if (err) {
+      console.error("Profil eklenirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    res.json({ success: true, message: "Profil başarıyla oluşturuldu", id: results.insertId });
+  });
+});
+
+// Kullanıcı silme endpoint'i
+app.delete("/api/users/:id", (req, res) => {
+  const { id } = req.params;
+
+  const query = `DELETE FROM users WHERE id = ?`;
+  connection.query(query, [id], (err, results) => {
+    if (err) {
+      console.error("Kullanıcı silinirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Kullanıcı bulunamadı" });
+    }
+    
+    res.json({ success: true, message: "Kullanıcı başarıyla silindi" });
   });
 });
 

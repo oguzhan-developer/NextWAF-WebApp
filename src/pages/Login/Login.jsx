@@ -14,11 +14,11 @@ function Login() {
     const handleLogin = async (e) => {
         e.preventDefault()
         try {                                   //10.211.55.5 http://10.211.55.5:${config.apiPort}/api/login
-            let response = await axios.post(`http://10.211.55.58:${config.apiPort}/api/login`, { username, password });
+            let response = await axios.post(`http://10.211.55.1:${config.apiPort}/api/login`, { username, password });
             console.log("responsee", response);
             
             if (response.data.success) {
-               response = await axios.get(`http://10.211.55.58:${config.apiPort}/api/user/${response.data.username}`);
+               response = await axios.get(`http://10.211.55.1:${config.apiPort}/api/user/${response.data.username}`);
                 console.log("kullanıcı ", response.data.user);
                 setCookie('user', JSON.stringify(response.data.user), { expires: 1 });
                 window.location.href = "/waf";

@@ -2,7 +2,7 @@
 
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
-MYSQL_HOST="10.211.55.5"
+MYSQL_HOST="172.20.10.14"
 MYSQL_DB="NextWAF"
 MYSQL_TABLE="sistem_monitor"
 

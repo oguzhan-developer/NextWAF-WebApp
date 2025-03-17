@@ -53,8 +53,8 @@
     color: var(--baslik-color);
 }
 
-#menu-btn{
-    cursor:default;
+#menu-btn {
+    cursor: default;
     margin: 0;
 }
 
@@ -66,7 +66,7 @@
 
 .ui.menu .item {
     color: var(--alt-baslik-color) !important;
-   /* left: -10px !important; Açılır menüyü sola kaydır */
+    /* left: -10px !important; Açılır menüyü sola kaydır */
 
 }
 
@@ -82,7 +82,7 @@
 
 }
 
-.card{
+.card {
     width: 25% !important;
 }
 
@@ -91,10 +91,11 @@
     /* width: 90%; */
 }
 
-.component{
+.component {
     background-color: var(--component-color) !important;
-    border:none !important;
+    border: none !important;
 }
+
 /* Stat panel düzen düzeltmeleri */
 .stat-panel {
     height: 100%;
@@ -246,7 +247,7 @@ canvas {
     align-items: center !important;
 }
 
-.column{
+.column {
     /* margin-top: 8rem; */
 }
 
@@ -263,7 +264,8 @@ canvas {
     display: flex;
     width: 100%;
     height: 100%;
-    margin-top: 60px; /* Üst menü yüksekliği */
+    margin-top: 60px;
+    /* Üst menü yüksekliği */
 }
 
 /* Sol kenar çubuğu */
@@ -295,6 +297,8 @@ canvas {
     margin: 0.1rem 0;
     border-radius: 0;
     border-left: 3px solid transparent;
+    position: relative;
+    /* For positioning badge */
 }
 
 .sidebar-item i {
@@ -316,13 +320,29 @@ canvas {
     font-weight: bold;
 }
 
+/* Kontrol edilmemiş loglar için bildirim rozeti */
+.notification-badge {
+    background-color: #db2828;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    display: inline-block;
+    min-width: 16px;
+    text-align: center;
+    line-height: 1;
+    vertical-align: middle;
+}
 
 /* Ana içerik alanı */
 .main-content {
     margin-top: -6.5rem !important;
     flex: 1;
     padding: 1.5rem;
-    margin-left: 220px; /* Sol menü genişliği */
+    margin-left: 220px;
+    /* Sol menü genişliği */
     width: calc(100% - 220px);
 }
 
@@ -333,8 +353,10 @@ canvas {
 }
 
 .card {
-    margin-top: 8rem !important; /* Üst kenar boşluğu arttırıldı */
-    width: 33.33% !important; /* Genişlik 3'te 1 olarak ayarlandı */
+    margin-top: 8rem !important;
+    /* Üst kenar boşluğu arttırıldı */
+    width: 33.33% !important;
+    /* Genişlik 3'te 1 olarak ayarlandı */
 }
 
 /* Responsive düzenlemeler */
@@ -361,9 +383,11 @@ canvas {
 
 /* Pasta grafiği için özel konteyner stilleri */
 .pie-chart-container {
-    padding: 0px 15px 15px 15px !important; /* Üst kısmı azalttık, efsane oraya gelecek */
+    padding: 0px 15px 15px 15px !important;
+    /* Üst kısmı azalttık, efsane oraya gelecek */
     margin-top: 0 !important;
-    height: 180px !important; /* Yüksekliği azalttık */
+    height: 180px !important;
+    /* Yüksekliği azalttık */
 }
 
 .pie-chart-container .chart-wrapper {
@@ -371,7 +395,8 @@ canvas {
 }
 
 .pie-chart-container canvas {
-    max-height: 160px !important; /* Grafiği biraz daha küçülttük */
+    max-height: 160px !important;
+    /* Grafiği biraz daha küçülttük */
     max-width: 160px !important;
     margin: 0 auto;
 }
@@ -406,18 +431,19 @@ canvas {
     color: var(--alt-baslik-color);
 }
 
-#system_info{
+#system_info {
     font-size: 1.02rem;
     margin-top: 1rem;
     display: flex;
     justify-content: space-between;
 }
 
-#system_info #left{
+#system_info #left {
     text-align: left;
     font-weight: bold;
 }
-#system_info #right{
+
+#system_info #right {
     text-align: right;
     letter-spacing: 0.04rem;
 }
@@ -447,7 +473,7 @@ canvas {
     width: 50%;
 }
 
-.sidebar-menu .icon{
+.sidebar-menu .icon {
     width: 16px !important;
     height: 16px !important;
     margin-right: 0.4rem;
@@ -457,4 +483,9 @@ canvas {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.ids-text {
+    display: flex;
+    align-items: center;
 }

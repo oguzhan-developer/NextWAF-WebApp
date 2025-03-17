@@ -76,7 +76,6 @@ function Sistem() {
 
     const buttonProps = getButtonProps();
 
-
     function getDescription(type) {
         const descriptions = {
             'Web Sunucusu (Apache)': 'NextWAF\'ın koruduğu websitenizin iletişim servisidir.',

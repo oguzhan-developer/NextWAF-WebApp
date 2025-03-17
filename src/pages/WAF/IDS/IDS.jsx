@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup } from 'semantic-ui-react';
-import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog, sendTestIDSMail } from '../../../utils/api';
+import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog } from '../../../utils/api';
 import './IDS.css';
 
 function IDS() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [sendingMail, setSendingMail] = useState(false);
-    const [emailStatus, setEmailStatus] = useState(null);
 
     useEffect(() => {
         loadLogs();
@@ -24,24 +22,6 @@ function IDS() {
             setLogs([]);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const sendTestMail = async () => {
-        setSendingMail(true);
-        try {
-            const result = await sendTestIDSMail();
-            setEmailStatus(result);
-            if (result.success) {
-                alert("Test e-postası başarıyla gönderildi!");
-            } else {
-                alert(`Hata: ${result.message}`);
-            }
-        } catch (error) {
-            alert("Mail gönderilirken hata oluştu: " + (error.message || "Bilinmeyen hata"));
-            setEmailStatus({ success: false, message: error.message });
-        } finally {
-            setSendingMail(false);
         }
     };
 
@@ -80,28 +60,13 @@ function IDS() {
                             primary
                             onClick={loadLogs}
                             loading={loading}
-                            style={{ marginRight: '10px' }}
                         >
                             <Icon name="refresh" />
                             Yenile
                         </Button>
-                        <Button 
-                            color="teal"
-                            onClick={sendTestMail}
-                            loading={sendingMail}
-                        >
-                            <Icon name="mail" />
-                            Test E-postası Gönder
-                        </Button>
                     </div>
                 </div>
                 <Divider />
-                {emailStatus && !emailStatus.success && (
-                    <div className="email-error-message">
-                        <Icon name="warning" color="red" />
-                        <span>E-posta yapılandırması hatalı. Lütfen .env dosyasındaki SMTP ayarlarını kontrol ediniz.</span>
-                    </div>
-                )}
                 <p className="section-description">
                     Tespit edilen saldırılara ait kayıtlar.
                 </p>

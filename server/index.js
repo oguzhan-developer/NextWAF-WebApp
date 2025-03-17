@@ -8,11 +8,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, "../.env") });
 import connection from "./db.js";
-import { sendIDSAlertEmail } from "../src/utils/email.js";
+import { sendIDSAlertEmail, sendSystemAlertEmail } from "../src/utils/email.js";
 const app = express();
 const port = process.env.VITE_APP_API_PORT || 5058;
 
 let lastCheckedIDSLogId = 0;
+let lastResourceAlertTime = {};
 //en son logid tutulacak, daha büyük logid geldiğinde, o alınır ve mail atılır.
 
 const initializeLastCheckedLogId = () => {
@@ -57,6 +58,85 @@ const checkNewIDSLogs = () => {
       }
     }
   });
+};
+
+const checkSystemResources = async () => {
+  try {
+    console.log("Sistem kaynakları kontrol ediliyor:", new Date().toISOString());
+    const query = "SELECT * FROM sistem_monitor ORDER BY tarih DESC LIMIT 1";
+    connection.query(query, async (err, results) => {
+      if (err) {
+        console.error("Sistem kaynak bilgisi kontrol edilirken hata oluştu: ", err);
+        return;
+      }
+
+      console.log("Sistem monitör sonuçları:", results);
+      
+      if (results && results.length > 0) {
+        const latestStat = results[0];
+        console.log("En son sistem durumu:", latestStat);
+        
+        // Veritabanındaki doğru alan adlarını kullan
+        const cpuUsage = latestStat.CPUYuzdesi || 0;
+        const ramUsage = latestStat.RAMYuzdesi || 0;
+        const diskUsage = latestStat.diskYuzdesi || 0;
+
+        console.log(`Mevcut kullanım - CPU: ${cpuUsage}%, RAM: ${ramUsage}%, Disk: ${diskUsage}%`);
+
+        // Kritik eşik - eşik düşürüldü daha kolay test edebilmek için
+        const CRITICAL_THRESHOLD = 65;
+        
+        const now = Date.now();
+        const MIN_ALERT_INTERVAL = 10 * 60 * 1000; // 10 dakika
+        
+        const alerts = [];
+        
+        if (cpuUsage > CRITICAL_THRESHOLD && 
+            (!lastResourceAlertTime.cpu || now - lastResourceAlertTime.cpu > MIN_ALERT_INTERVAL)) {
+          alerts.push({resource: 'CPU', usage: cpuUsage});
+          lastResourceAlertTime.cpu = now;
+          console.log(`CPU kullanımı kritik seviyede: ${cpuUsage}%`);
+        }
+        
+        if (ramUsage > CRITICAL_THRESHOLD && 
+            (!lastResourceAlertTime.ram || now - lastResourceAlertTime.ram > MIN_ALERT_INTERVAL)) {
+          alerts.push({resource: 'RAM', usage: ramUsage});
+          lastResourceAlertTime.ram = now;
+          console.log(`RAM kullanımı kritik seviyede: ${ramUsage}%`);
+        }
+        
+        if (diskUsage > CRITICAL_THRESHOLD && 
+            (!lastResourceAlertTime.disk || now - lastResourceAlertTime.disk > MIN_ALERT_INTERVAL)) {
+          alerts.push({resource: 'Disk', usage: diskUsage});
+          lastResourceAlertTime.disk = now;
+          console.log(`Disk kullanımı kritik seviyede: ${diskUsage}%`);
+        }
+        
+        console.log("Oluşturulan uyarılar:", alerts);
+        
+        if (alerts.length > 0) {
+          console.log("Uyarılar bulundu, e-posta gönderiliyor...");
+          try {
+            const alertSent = await sendSystemAlertEmail(alerts, latestStat);
+            
+            if (alertSent) {
+              console.log(`${alerts.map(a => a.resource).join(', ')} kaynak uyarı e-postası gönderildi`);
+            } else {
+              console.error("Kaynak uyarı e-postası gönderilemedi");
+            }
+          } catch (emailError) {
+            console.error("E-posta gönderimi sırasında hata:", emailError);
+          }
+        } else {
+          console.log("Kritik kaynak kullanımı yok, uyarı gönderilmedi.");
+        }
+      } else {
+        console.log("Sistem kaynak verileri bulunamadı.");
+      }
+    });
+  } catch (error) {
+    console.error("Sistem kaynakları kontrolü sırasında hata:", error);
+  }
 };
 
 app.use(
@@ -300,6 +380,7 @@ app.get("/api/server-stats", (req, res) => {
     res.json({ success: true, stats: results });
   });
 });
+
 app.post("/api/send-test-email", async (req, res) => {
   try {
     const testLog = {
@@ -378,10 +459,95 @@ app.post("/api/idsLogs/:id/status", (req, res) => {
   });
 });
 
+app.get("/api/latest-system-stats", (req, res) => {
+  const query = "SELECT * FROM sistem_monitor ORDER BY tarih DESC LIMIT 1";
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Son sistem durumu çekilirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    res.json({ success: true, stats: results[0] || {} });
+  });
+});
+
+// Test amacıyla sistemi zorlayarak bir uyarı e-postası gönderen endpoint
+app.get("/api/force-check-resources", async (req, res) => {
+  try {
+    console.log("Sistem uyarı e-postası zorla isteği alındı");
+    
+    // Sistem istatistiklerini çek
+    const query = "SELECT * FROM sistem_monitor ORDER BY tarih DESC LIMIT 1";
+    connection.query(query, async (err, results) => {
+      if (err) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Sistem istatistikleri alınamadı: " + err.message 
+        });
+      }
+      
+      if (!results || results.length === 0) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "Sistem istatistikleri bulunamadı" 
+        });
+      }
+      
+      // Sistemde zorla %85 üzerinde kullanım olduğu varsayımını yapacağız
+      const latestStat = results[0];
+      const fakeStats = {
+        ...latestStat,
+        CPUYuzdesi: Math.max(latestStat.CPUYuzdesi || 0, 85), // En az %85
+        RAMYuzdesi: Math.max(latestStat.RAMYuzdesi || 0, 85), // En az %85
+        diskYuzdesi: Math.max(latestStat.diskYuzdesi || 0, 85) // En az %85
+      };
+      
+      const alerts = [
+        {resource: 'CPU', usage: fakeStats.CPUYuzdesi},
+        {resource: 'RAM', usage: fakeStats.RAMYuzdesi},
+        {resource: 'Disk', usage: fakeStats.diskYuzdesi}
+      ];
+      
+      // E-posta gönder
+      const alertSent = await sendSystemAlertEmail(alerts, fakeStats);
+      
+      if (alertSent) {
+        res.json({
+          success: true,
+          message: "Test uyarı e-postası başarıyla gönderildi"
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Uyarı e-postası gönderilemedi"
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Test uyarı e-postası gönderilirken hata:", error);
+    res.status(500).json({
+      success: false,
+      message: `Hata: ${error.message}`
+    });
+  }
+});
+
 initializeLastCheckedLogId();
+
+// Başlangıçta bir kez çalıştır
+console.log("İlk sistem kaynakları kontrolü planlanıyor...");
+setTimeout(() => {
+  console.log("İlk sistem kaynakları kontrolü yapılıyor...");
+  checkSystemResources();
+}, 5000);
+
+// Ardından düzenli aralıklarla kontrol et
+const interval = 60 * 1000; // 1 dakika
+console.log(`Sistem kaynakları ${interval/1000} saniyede bir kontrol edilecek`);
+setInterval(checkSystemResources, interval);
 
 //ids logu geldiğinde mail göndermek için, yarım dakikada bir kontrol.
 setInterval(checkNewIDSLogs, 30000);
+
 app.listen(port, () => {
   console.log(`Sunucu ${port} portunda dinleniyor...`);
 });

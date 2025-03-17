@@ -2,7 +2,7 @@
 
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
-MYSQL_HOST="10.211.55.5"
+MYSQL_HOST="172.20.10.14"
 MYSQL_DB="NextWAF"
 MYSQL_TABLE="logs"
 IDS_TABLE="idsLogs"
@@ -194,3 +194,4 @@ tail -f "$LOG_FILE" | while read -r line; do
 
     insert_log "$ip" "$timestamp" "$method" "$uri" "$status" "$size" "$referrer" "$user_agent"
 done
+

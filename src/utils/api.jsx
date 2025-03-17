@@ -2,7 +2,8 @@ import axios from 'axios';
 //username: admin
 //pass rootroot
 const dbPort = import.meta.env.VITE_APP_API_PORT || 5058;
-const system_ip = import.meta.env.VITE_APP_SYSTEM_IP || '10.211.55.5';
+const dbIP = import.meta.env.VITE_APP_DB_IP || "172.20.10.2";
+const system_ip = import.meta.env.VITE_APP_CMD_API_IP || '172.17.0.1';
 const system_port = import.meta.env.VITE_APP_SYSTEM_PORT || '8080';
 console.log(dbPort);
 
@@ -20,7 +21,7 @@ console.log(dbPort);
 
 export const fetchServerStats = async (limit) => {
     try {
-        const response = await axios.get(`http://localhost:${dbPort}/api/server-stats?limit=${limit}`);
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/server-stats?limit=${limit}`);
         return response.data.stats;
     } catch (error) {
         console.error('Sunucu istatistiklerini çekerken hata oluştu:', error);
@@ -210,7 +211,7 @@ export async function fetchLogs(params = {}) { //from DB
         console.log(`Logs isteği - Sayfa: ${page}, Limit: ${limit}`);
 
         // API isteğini yapıyoruz
-        const response = await axios.get(`http://localhost:${dbPort}/api/logs`, {
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/logs`, {
             params: {
                 page,
                 limit,
@@ -220,8 +221,7 @@ export async function fetchLogs(params = {}) { //from DB
             }
         });
 
-        // Başlıklar yerine toplam kayıt sayısını hesaplamak için önce ana isteği yap
-        const totalCountResponse = await axios.get(`http://localhost:${dbPort}/api/logs-count`, {
+        const totalCountResponse = await axios.get(`http://${dbIP}:${dbPort}/api/logs-count`, {
             params: { search }
         });
 
@@ -284,7 +284,7 @@ export const fethIsHTTPSPortActive = async () => {
 };
 export const removeIDSLog = async (id) => {
     try {
-        const response = await axios.delete(`http://localhost:${dbPort}/api/idsLogs/${id}`);
+        const response = await axios.delete(`http://${dbIP}:${dbPort}/api/idsLogs/${id}`);
         return response.data;
     } catch (error) {
         const message = 'IDS logu silinirken hata oluştu';
@@ -295,7 +295,7 @@ export const removeIDSLog = async (id) => {
 
 export const changeIDSLogStatus = async (id, currentStatus) => {
     try {
-        const response = await axios.post(`http://localhost:${dbPort}/api/idsLogs/${id}/status`,
+        const response = await axios.post(`http://${dbIP}:${dbPort}/api/idsLogs/${id}/status`,
             {
                 status: currentStatus ? 0 : 1 //1 ise 0, 0 ise 1 yapması için   
             });
@@ -323,7 +323,7 @@ export const changeWebServiceStatus = async (status, port) => {
 
 export async function fetchIDSLogs() {
     try {
-        const response = await axios.get(`http://localhost:${dbPort}/api/idsLogs`);
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/idsLogs`);
         console.log(response.data);
 
         return response.data.logs;
@@ -336,7 +336,7 @@ export async function fetchIDSLogs() {
 // E-posta bağlantısını test et
 export async function testEmailConnection() {
     try {
-        const response = await axios.get(`http://localhost:${dbPort}/api/test-email`);
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/test-email`);
         return response.data;
     } catch (error) {
         console.error('E-posta testi başarısız:', error);
@@ -346,7 +346,7 @@ export async function testEmailConnection() {
 
 export async function sendTestIDSMail() {
     try {
-        const response = await axios.post(`http://localhost:${dbPort}/api/send-test-email`);
+        const response = await axios.post(`http://${dbIP}:${dbPort}/api/send-test-email`);
         return response.data;
     } catch (error) {
         console.error('Test mail gönderilirken hata oluştu:', error);
@@ -357,7 +357,7 @@ export async function sendTestIDSMail() {
 // Profilleri getir
 export const fetchUsers = async () => {
     try {
-        const response = await axios.get(`http://localhost:${dbPort}/api/users`);
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/users`);
         return response.data.users;
     } catch (error) {
         console.error('Kullanıcılar getirilirken hata oluştu:', error);
@@ -367,7 +367,7 @@ export const fetchUsers = async () => {
 
 export const fetchProfileDetails = async (id) => {
     try {
-        const response = await axios.get(`http://localhost:${dbPort}/api/users/${id}`);
+        const response = await axios.get(`http://${dbIP}:${dbPort}/api/users/${id}`);
         return response.data.user;
     } catch (error) {
         console.error('Profil detayı getirilirken hata oluştu:', error);
@@ -378,7 +378,7 @@ export const fetchProfileDetails = async (id) => {
 // Profil güncelle
 export const updateProfile = async (id, profileData) => {
     try {
-        const response = await axios.put(`http://localhost:${dbPort}/api/users/${id}`, profileData);
+        const response = await axios.put(`http://${dbIP}:${dbPort}/api/users/${id}`, profileData);
         return response.data;
     } catch (error) {
         console.error('Profil güncellenirken hata oluştu:', error);
@@ -389,7 +389,7 @@ export const updateProfile = async (id, profileData) => {
 // Yeni profil oluştur
 export const createProfile = async (profileData) => {
     try {
-        const response = await axios.post(`http://localhost:${dbPort}/api/users`, profileData);
+        const response = await axios.post(`http://${dbIP}:${dbPort}/api/users`, profileData);
         return response.data;
     } catch (error) {
         console.error('Profil oluşturulurken hata oluştu:', error);
@@ -400,12 +400,34 @@ export const createProfile = async (profileData) => {
 // Kullanıcı sil
 export const deleteUser = async (id) => {
     try {
-        const response = await axios.delete(`http://localhost:${dbPort}/api/users/${id}`);
+        const response = await axios.delete(`http://${dbIP}:${dbPort}/api/users/${id}`);
         return response.data;
     } catch (error) {
         console.error('Kullanıcı silinirken hata oluştu:', error);
         throw error;
     }
+};
+
+// Logout fonksiyonu
+export const logout = async (username) => {
+  try {
+    const response = await axios.post(`http://localhost:${dbPort}/api/logout`, { username });
+    return response.data;
+  } catch (error) {
+    console.error('Çıkış yaparken hata oluştu:', error);
+    throw error;
+  }
+};
+
+// Aktif kullanıcıları getir
+export const fetchActiveUsers = async () => {
+  try {
+    const response = await axios.get(`http://localhost:${dbPort}/api/active-users`);
+    return response.data.users;
+  } catch (error) {
+    console.error('Aktif kullanıcılar getirilirken hata oluştu:', error);
+    throw error;
+  }
 };
 
 

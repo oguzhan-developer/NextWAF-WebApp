@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Menu.css';
 import { getCookieJSON, removeCookie } from '../../utils/cookie';
+import { logout } from '../../utils/api';
 import i_profile from "../../assets/icons/i_profile.svg";
 import i_logout from "../../assets/icons/i_logout.svg";
 import i_settings from "../../assets/icons/i_settings.svg";
@@ -32,9 +33,22 @@ function Menu() {
         };
     }, []);
 
-    const handleLogout = () => {
-        removeCookie('user');
-        window.location.href = "/login";
+    const handleLogout = async () => {
+        try {
+            const user = getCookieJSON("user");
+            if (user) {
+                // Sunucuya çıkış bildirimini gönder
+                await logout(user.username);
+            }
+        } catch (error) {
+            console.error("Çıkış yaparken hata oluştu:", error);
+        } finally {
+            // Cookie temizleme işlemi (zaten mevcut)
+            removeCookie('user');
+            
+            // Kullanıcıyı login sayfasına yönlendir (zaten mevcut)
+            window.location.href = "/login";
+        }
     };
 
     const toggleDropdown = () => {

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup } from 'semantic-ui-react';
-import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog } from '../../../utils/api';
+import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup, Modal } from 'semantic-ui-react';
+import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog, blockIP, blockAttackSource } from '../../../utils/api';
 import './IDS.css';
 
 function IDS() {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [blockModalOpen, setBlockModalOpen] = useState(false);
+    const [selectedIP, setSelectedIP] = useState(null);
+    const [blockingIP, setBlockingIP] = useState(false);
+    const [blockMessage, setBlockMessage] = useState({ type: '', content: '' });
 
     useEffect(() => {
         loadLogs();
@@ -22,6 +26,76 @@ function IDS() {
             setLogs([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleIPClick = (ip) => {
+        setSelectedIP(ip);
+        setBlockModalOpen(true);
+        setBlockMessage({ type: '', content: '' });
+    };
+
+    const handleBlockIP = async () => {
+        if (!selectedIP) return;
+        
+        setBlockingIP(true);
+        setBlockMessage({ type: '', content: '' });
+        
+        try {
+            const response = await blockIP(selectedIP, 'Saldırı girişimi nedeniyle engellendi');
+            
+            if (response.success) {
+                setBlockMessage({ 
+                    type: 'success', 
+                    content: `${selectedIP} adresi başarıyla engellendi.` 
+                });
+                // Logları yenile
+                loadLogs();
+            } else {
+                setBlockMessage({ 
+                    type: 'error', 
+                    content: response.message || 'IP adresi engellenirken bir hata oluştu.' 
+                });
+            }
+        } catch (error) {
+            console.error('IP adresi engellenirken hata:', error);
+            setBlockMessage({ 
+                type: 'error', 
+                content: 'IP adresi engellenirken bir hata oluştu.' 
+            });
+        } finally {
+            setBlockingIP(false);
+        }
+    };
+
+    const handleBlockAttackSource = async (logId, ipAddress) => {
+        setBlockingIP(true);
+        setBlockMessage({ type: '', content: '' });
+        
+        try {
+            const response = await blockAttackSource(logId);
+            
+            if (response.success) {
+                setBlockMessage({ 
+                    type: 'success', 
+                    content: `${ipAddress} adresi başarıyla engellendi ve log işaretlendi.` 
+                });
+                // Logları yenile
+                loadLogs();
+            } else {
+                setBlockMessage({ 
+                    type: 'error', 
+                    content: response.message || 'Saldırı kaynağı engellenirken bir hata oluştu.' 
+                });
+            }
+        } catch (error) {
+            console.error('Saldırı kaynağı engellenirken hata:', error);
+            setBlockMessage({ 
+                type: 'error', 
+                content: 'Saldırı kaynağı engellenirken bir hata oluştu.' 
+            });
+        } finally {
+            setBlockingIP(false);
         }
     };
 
@@ -110,7 +184,16 @@ function IDS() {
                                     <Table.Row key={log.id}>
                                         <Table.Cell>{log.id}</Table.Cell>
                                         <Table.Cell>{formatDateTime(log.timestamp)}</Table.Cell>
-                                        <Table.Cell>{log.ip_address}</Table.Cell>
+                                        <Table.Cell className="clickable-ip" onClick={() => handleIPClick(log.ip_address)}>
+                                            <Popup
+                                                content="IP adresini engellemek için tıklayın"
+                                                trigger={
+                                                    <span className="ip-link">
+                                                        {log.ip_address}
+                                                    </span>
+                                                }
+                                            />
+                                        </Table.Cell>
                                         <Table.Cell className="uri-cell">
                                             <div className="truncate-text" title={log.request_uri}>
                                                 {log.request_uri}
@@ -139,7 +222,17 @@ function IDS() {
                                                 {
                                                     log.checked ?
                                                      (<Button size='small' className='btn basic red' onClick={() => removeIDSLog(log.id).then(loadLogs)}>Kaldır</Button>) : 
-                                                     (<Button size='small' className='btn basic black'onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}>Tamamla</Button>)
+                                                     (<>
+                                                        <Button size='small' className='btn basic black'onClick={() => changeIDSLogStatus(log.id, log.checked).then(loadLogs)}>Tamamla</Button>
+                                                        <Button 
+                                                            size='small' 
+                                                            className='btn basic red' 
+                                                            onClick={() => handleBlockAttackSource(log.id, log.ip_address)}
+                                                            title="Saldırı kaynağını engelle ve logu işaretle"
+                                                        >
+                                                            <Icon name="ban" /> Engelle
+                                                        </Button>
+                                                    </>)
                                                 }
 
                                             </div>
@@ -165,6 +258,46 @@ function IDS() {
                         </Statistic.Group>
                     </div>
                 )}
+                
+                {/* IP Engelleme Modal */}
+                <Modal
+                    open={blockModalOpen}
+                    onClose={() => setBlockModalOpen(false)}
+                    size="small"
+                >
+                    <Modal.Header>IP Adresi Engelleme</Modal.Header>
+                    <Modal.Content>
+                        <p>
+                            <strong>{selectedIP}</strong> IP adresini engellemek istediğinize emin misiniz?
+                            Bu adres, sisteme erişmeye çalıştığında paketler düşürülecektir.
+                        </p>
+                        
+                        {blockMessage.type && (
+                            <div className={`message ${blockMessage.type}`}>
+                                {blockMessage.type === 'success' ? (
+                                    <Icon name="check circle" />
+                                ) : (
+                                    <Icon name="times circle" />
+                                )}
+                                {blockMessage.content}
+                            </div>
+                        )}
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={() => setBlockModalOpen(false)}>
+                            İptal
+                        </Button>
+                        <Button 
+                            negative 
+                            onClick={handleBlockIP}
+                            loading={blockingIP}
+                            disabled={blockMessage.type === 'success'}
+                        >
+                            <Icon name="ban" />
+                            IP Adresini Engelle
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
             </Segment>
         </div>
     );

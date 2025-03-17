@@ -8,6 +8,7 @@ import i_cpu from '../../../assets/icons/i_cpu.svg';
 import i_logs from '../../../assets/icons/i_logs.svg';
 import i_security from '../../../assets/icons/i_security.svg';
 import i_shield from '../../../assets/icons/i_health.svg';
+import i_firewall from '../../../assets/icons/i_firewall.svg'; // Ekleyeceğiniz ikon
 import { fetchIsSystemActive, fetchIDSLogs } from '../../../utils/api';
 
 function WAFLayout() {
@@ -93,6 +94,10 @@ function WAFLayout() {
                                     <span className="notification-badge">{uncheckedLogs}</span>
                                 )}
                             </span>
+                        </Link>
+                        <Link to="/waf/ipblock" className={`sidebar-item ${isActive('/waf/ipblock') ? 'active' : ''}`}>
+                            <img src={i_firewall} alt="IP Engelleme" className='icon' />
+                            <span>IP Engelleme</span>
                         </Link>
                     </div>
                 </div>

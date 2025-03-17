@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import crypto from "crypto"; // Şifreleme için crypto modülünü ekle
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -13,6 +14,10 @@ import connection from "./db.js";
 import { sendIDSAlertEmail, sendSystemAlertEmail } from "../src/utils/email.js";
 const app = express();
 const port = process.env.VITE_APP_API_PORT || 5058;
+
+// system_ip ve system_port değişkenlerini tanımla
+const system_ip = process.env.VITE_APP_CMD_API_IP || '172.17.0.1';
+const system_port = process.env.VITE_APP_SYSTEM_PORT || '8080';
 
 // Parola şifreleme fonksiyonu
 const hashPassword = (password) => {
@@ -545,6 +550,253 @@ app.get("/api/force-check-resources", async (req, res) => {
       message: `Hata: ${error.message}`
     });
   }
+});
+
+// Engellenen IP adreslerini getir
+app.get("/api/blocked-ips", (req, res) => {
+  const query = "SELECT * FROM blocked_ips ORDER BY blocked_date DESC";
+  
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Engellenen IP'ler alınırken hata oluştu:", err);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Engellenen IP'ler alınırken bir hata oluştu." 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      ips: results || [] 
+    });
+  });
+});
+
+// IP adresi engelle
+app.post("/api/block-ip", (req, res) => {
+  const { ip, reason } = req.body;
+  
+  if (!ip) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "IP adresi belirtilmelidir." 
+    });
+  }
+  
+  // IP adresinin geçerliliğini kontrol et
+  const ipRegex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+  if (!ipRegex.test(ip)) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Geçersiz IP adresi formatı." 
+    });
+  }
+  
+  // IP adresi zaten engellendi mi kontrol et
+  const checkQuery = "SELECT * FROM blocked_ips WHERE address = ?";
+  connection.query(checkQuery, [ip], (checkErr, checkResults) => {
+    if (checkErr) {
+      console.error("IP kontrolünde hata:", checkErr);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Sunucu hatası" 
+      });
+    }
+    
+    if (checkResults && checkResults.length > 0) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Bu IP adresi zaten engellenmiş durumda." 
+      });
+    }
+    
+    // IP'yi veritabanına ekle
+    const insertQuery = "INSERT INTO blocked_ips (address, reason, blocked_date) VALUES (?, ?, NOW())";
+    connection.query(insertQuery, [ip, reason || 'Manuel olarak engellendi'], async (insertErr) => {
+      if (insertErr) {
+        console.error("IP engellenirken hata:", insertErr);
+        return res.status(500).json({ 
+          success: false, 
+          message: "IP engellenirken bir hata oluştu." 
+        });
+      }
+      
+      // Firewall'da IP'yi engelle (iptables ile)
+      try {
+        // Sistem komutunu çalıştır
+        const command = `sudo iptables -A INPUT -s ${ip} -j DROP`;
+        console.log("Çalıştırılan komut:", command);
+        
+        const response = await axios.get(`http://${system_ip}:${system_port}/cmd.php`, {
+          params: {
+            command: command
+          },
+          timeout: 5000
+        });
+        
+        console.log("Firewall komutu yanıtı:", response.data);
+        
+        res.json({ 
+          success: true, 
+          message: `${ip} adresi başarıyla engellendi.` 
+        });
+      } catch (error) {
+        console.error("Firewall komutu çalıştırılırken hata:", error);
+        
+        // Veritabanına kayıt başarılı, ancak firewall komutu çalıştırılamadı
+        res.json({ 
+          success: true, 
+          message: `${ip} adresi veritabanında engellendi.`,
+          warning: "Firewall güncellenemedi. Lütfen sistem yöneticinize başvurun."
+        });
+      }
+    });
+  });
+});
+
+// IP engellemeyi kaldır
+app.delete("/api/blocked-ips/:ip", (req, res) => {
+  const { ip } = req.params;
+  
+  if (!ip) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "IP adresi belirtilmelidir." 
+    });
+  }
+  
+  // IP adresini veritabanından kaldır
+  const deleteQuery = "DELETE FROM blocked_ips WHERE address = ?";
+  connection.query(deleteQuery, [ip], async (deleteErr, results) => {
+    if (deleteErr) {
+      console.error("IP engeli kaldırılırken hata:", deleteErr);
+      return res.status(500).json({ 
+        success: false, 
+        message: "IP engeli kaldırılırken bir hata oluştu." 
+      });
+    }
+    
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Belirtilen IP adresi engellenenler listesinde bulunamadı." 
+      });
+    }
+    
+    // Firewall'dan IP engelini kaldır
+    try {
+      const command = `sudo iptables -D INPUT -s ${ip} -j DROP`;
+      console.log("Çalıştırılan komut:", command);
+      
+      const response = await axios.get(`http://${system_ip}:${system_port}/cmd.php`, {
+        params: {
+          command: command
+        },
+        timeout: 5000
+      });
+      
+      console.log("Firewall komutu yanıtı:", response.data);
+      
+      res.json({ 
+        success: true, 
+        message: `${ip} adresi için engelleme kaldırıldı.` 
+      });
+    } catch (error) {
+      console.error("Firewall komutu çalıştırılırken hata:", error);
+      
+      // Veritabanından kaldırma başarılı, ancak firewall komutu çalıştırılamadı
+      res.json({ 
+        success: true, 
+        message: `${ip} adresi veritabanından kaldırıldı.`,
+        warning: "Firewall güncellemesi yapılamadı. Lütfen sistem yöneticinize başvurun."
+      });
+    }
+  });
+});
+
+// IDS log için otomatik IP engelleme
+app.post("/api/block-attack-source", async (req, res) => {
+  const { logId } = req.body;
+  
+  if (!logId) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Log ID belirtilmelidir." 
+    });
+  }
+  
+  // Önce log kaydını bul
+  const logQuery = "SELECT * FROM idsLogs WHERE id = ?";
+  connection.query(logQuery, [logId], async (logErr, logs) => {
+    if (logErr || !logs || logs.length === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Belirtilen log kaydı bulunamadı." 
+      });
+    }
+    
+    const log = logs[0];
+    const ipAddress = log.ip_address;
+    const reason = `${log.attack_type} saldırısı nedeniyle otomatik engellendi (Log ID: ${log.id})`;
+    
+    // IP'yi engelle - Veritabanı kontrolü
+    const checkQuery = "SELECT * FROM blocked_ips WHERE address = ?";
+    connection.query(checkQuery, [ipAddress], (checkErr, checkResults) => {
+      if (checkErr) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Sunucu hatası" 
+        });
+      }
+      
+      if (checkResults && checkResults.length > 0) {
+        return res.json({ 
+          success: false, 
+          message: "Bu IP adresi zaten engellenmiş durumda." 
+        });
+      }
+      
+      // IP'yi veritabanına ekle
+      const insertQuery = "INSERT INTO blocked_ips (address, reason, blocked_date) VALUES (?, ?, NOW())";
+      connection.query(insertQuery, [ipAddress, reason], async (insertErr) => {
+        if (insertErr) {
+          return res.status(500).json({ 
+            success: false, 
+            message: "IP engellenirken bir hata oluştu." 
+          });
+        }
+        
+        try {
+          // Log durumunu "kontrol edildi" olarak işaretle
+          const updateQuery = "UPDATE idsLogs SET checked = ? WHERE id = ?";
+          connection.query(updateQuery, [1, logId]);
+          
+          // Firewall'da IP'yi engelle
+          const command = `sudo iptables -A INPUT -s ${ipAddress} -j DROP`;
+          
+          const response = await axios.get(`http://${system_ip}:${system_port}/cmd.php`, {
+            params: {
+              command: command
+            },
+            timeout: 5000
+          });
+          
+          res.json({ 
+            success: true, 
+            message: `${ipAddress} adresi başarıyla engellendi ve log işaretlendi.` 
+          });
+        } catch (error) {
+          console.error("Firewall komutu çalıştırılırken hata:", error);
+          
+          res.json({ 
+            success: true, 
+            message: `${ipAddress} adresi veritabanında engellendi ve log işaretlendi.`,
+            warning: "Firewall güncellenemedi."
+          });
+        }
+      });
+    });
+  });
 });
 
 initializeLastCheckedLogId();

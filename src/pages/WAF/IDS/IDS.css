@@ -232,3 +232,57 @@
     gap: 10px;
     font-size: 0.9rem;
 }
+
+.clickable-ip {
+    cursor: pointer;
+}
+
+.ip-link {
+    color: var(--baslik-color);
+    text-decoration: none;
+    padding: 3px 6px;
+    border-radius: 3px;
+    background-color: rgba(33, 133, 208, 0.08);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.ip-link:hover {
+    background-color: rgba(33, 133, 208, 0.15);
+    color: #1678c2;
+}
+
+.ip-link:after {
+    content: '\f084';
+    font-family: 'Icons';
+    margin-left: 5px;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.ip-link:hover:after {
+    opacity: 1;
+}
+
+.message {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+.message.success {
+    background-color: #f8fffa;
+    color: #21ba45;
+    border-left: 3px solid #21ba45;
+}
+
+.message.error {
+    background-color: #fff6f6;
+    color: #db2828;
+    border-left: 3px solid #db2828;
+}
+
+.message .icon {
+    margin-right: 8px;
+}

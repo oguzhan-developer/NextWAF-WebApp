@@ -1,0 +1,62 @@
+.ipblock-page {
+    margin-top: 4rem;
+    padding: 20px 0;
+}
+
+.subheader {
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.table-container {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.loading-indicator {
+    padding: 2rem;
+    text-align: center;
+    color: var(--alt-baslik-color);
+}
+
+.empty-list {
+    padding: 2rem;
+    text-align: center;
+    color: var(--alt-baslik-color);
+}
+
+.empty-list i {
+    margin-bottom: 0.5rem;
+}
+
+.ui.pagination.menu {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.action-bar {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.reason-cell {
+    word-break: break-word;
+    max-width: 300px;
+}
+
+/* Modal için özel stilller */
+.ui.modal .form-field {
+    margin-bottom: 1rem;
+}
+
+/* Tablo hücreleri için düzenlemeler */
+.blocked-ips-table th,
+.blocked-ips-table td {
+    padding: 0.8em !important;
+}
+
+.blocked-ips-table td:last-child {
+    text-align: center;
+}

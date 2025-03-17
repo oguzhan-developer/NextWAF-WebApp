@@ -430,6 +430,53 @@ export const fetchActiveUsers = async () => {
   }
 };
 
+// IP engelleme işlemleri
+export async function fetchBlockedIPs() {
+  try {
+    const response = await axios.get(`http://${dbIP}:${dbPort}/api/blocked-ips`);
+    return response.data.ips || [];
+  } catch (error) {
+    console.error('Engellenen IP\'ler alınırken hata oluştu:', error);
+    throw error;
+  }
+}
+
+export async function blockIP(ipAddress, reason = 'Manuel olarak engellendi') {
+  try {
+    const response = await axios.post(`http://${dbIP}:${dbPort}/api/block-ip`, { 
+      ip: ipAddress,
+      reason: reason
+    });
+    return response.data;
+  } catch (error) {
+    console.error('IP engellenirken hata oluştu:', error);
+    throw error;
+  }
+}
+
+export async function unblockIP(ipAddress) {
+  try {
+    const response = await axios.delete(`http://${dbIP}:${dbPort}/api/blocked-ips/${ipAddress}`);
+    return response.data;
+  } catch (error) {
+    console.error('IP engeli kaldırılırken hata oluştu:', error);
+    throw error;
+  }
+}
+
+// IP engelleme işlemleri (Saldırı kaynağını doğrudan engelleme)
+export async function blockAttackSource(logId) {
+  try {
+    const response = await axios.post(`http://${dbIP}:${dbPort}/api/block-attack-source`, { 
+      logId: logId 
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Saldırı kaynağı engellenirken hata oluştu:', error);
+    throw error;
+  }
+}
+
 
 
 

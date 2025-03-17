@@ -4,6 +4,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import crypto from "crypto"; // Şifreleme için crypto modülünü ekle
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, "../.env") });
@@ -11,6 +13,11 @@ import connection from "./db.js";
 import { sendIDSAlertEmail, sendSystemAlertEmail } from "../src/utils/email.js";
 const app = express();
 const port = process.env.VITE_APP_API_PORT || 5058;
+
+// Parola şifreleme fonksiyonu
+const hashPassword = (password) => {
+  return crypto.createHash('sha256').update(password).digest('hex');
+};
 
 let lastCheckedIDSLogId = 0;
 let lastResourceAlertTime = {};
@@ -175,18 +182,21 @@ app.get("/api/user/:username", (req, res) => {
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
+  const hashedPassword = hashPassword(password);
+  
   const query = `select * from users where username = ? and password = ?`;
-  connection.query(query, [username, password], (err, results) => {
+  connection.query(query, [username, hashedPassword], (err, results) => {
     if (err) {
       console.error("Sorgu sırasında hata oluştu: ", err);
       return res.status(500).json({ success: false, message: "Sunucu hatası" });
     }
 
     if (results.length > 0) {
-      const updateQuery = `UPDATE users SET son_giris = CURRENT_TIMESTAMP WHERE username = ?`;
+      // Son giriş zamanını güncelle ve kullanıcıyı aktif olarak işaretle
+      const updateQuery = `UPDATE users SET son_giris = CURRENT_TIMESTAMP, active = 1 WHERE username = ?`;
       connection.query(updateQuery, [username], (updateErr) => {
         if (updateErr) {
-          console.error("Son giriş zamanı güncellenirken hata oluştu: ", updateErr);
+          console.error("Kullanıcı durumu güncellenirken hata oluştu: ", updateErr);
         }
       });
 
@@ -239,8 +249,11 @@ app.put("/api/users/:id", (req, res) => {
   let query, params;
   
   if (password) {
+    // Parolayı şifrele
+    const hashedPassword = hashPassword(password);
+    
     query = `UPDATE users SET username = ?, email = ?, full_name = ?, password = ? WHERE id = ?`;
-    params = [username, email, full_name, password, id];
+    params = [username, email, full_name, hashedPassword, id];
   } else {
     query = `UPDATE users SET username = ?, email = ?, full_name = ?, WHERE id = ?`;
     params = [username, email, full_name, id];
@@ -260,8 +273,11 @@ app.put("/api/users/:id", (req, res) => {
 app.post("/api/users", (req, res) => {
   const { username, email, full_name, role, password } = req.body;
   
+  // Parolayı şifrele
+  const hashedPassword = hashPassword(password);
+  
   const query = `INSERT INTO users (username, email, full_name, password, olusturulma) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`;
-  connection.query(query, [username, email, full_name, password], (err, results) => {
+  connection.query(query, [username, email, full_name, hashedPassword], (err, results) => {
     if (err) {
       console.error("Profil eklenirken hata oluştu: ", err);
       return res.status(500).json({ success: false, message: "Sunucu hatası" });

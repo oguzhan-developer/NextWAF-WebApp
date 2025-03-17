@@ -247,9 +247,6 @@ canvas {
     align-items: center !important;
 }
 
-.column {
-    /* margin-top: 8rem; */
-}
 
 /* Kullanım oranına göre renk değişkenleri */
 :root {

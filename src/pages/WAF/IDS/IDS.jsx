@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup, Modal } from 'semantic-ui-react';
 import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog, blockIP, blockAttackSource } from '../../../utils/api';
-import { useNavigate } from 'react-router-dom'; // Add this import
+import { useNavigate } from 'react-router-dom';
 import './IDS.css';
 
 function IDS() {
-    const navigate = useNavigate(); // Add this line to define navigate
+    const navigate = useNavigate(); 
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [blockModalOpen, setBlockModalOpen] = useState(false);
@@ -121,7 +121,6 @@ function IDS() {
         }).format(date);
     };
 
-    // HTTP koduna göre renk ayarlaması (css class)
     const getStatusColor = (status) => {
         if (status >= 500) return 'error-status';
         if (status >= 400) return 'warning-status';

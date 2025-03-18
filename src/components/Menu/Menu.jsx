@@ -58,7 +58,6 @@ function Menu() {
             </div>
             <div className="menu-items">
                 <div className="menu-item user-info" onClick={toggleDropdown}>
-                    {/* <img src={i_profile} id='profile_icon' /> */}
                     <strong id='username_text'>{username}</strong>
                     <img src={i_arrow_down} id='arrow_icon' />
                     {dropdownOpen && (

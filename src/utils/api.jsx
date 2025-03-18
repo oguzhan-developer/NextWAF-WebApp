@@ -464,7 +464,6 @@ export async function unblockIP(ipAddress) {
   }
 }
 
-// IP engelleme işlemleri (Saldırı kaynağını doğrudan engelleme)
 export async function blockAttackSource(logId) {
   try {
     const response = await axios.post(`http://${dbIP}:${dbPort}/api/block-attack-source`, { 

@@ -45,8 +45,9 @@ function IPBlock() {
             setBlockedIPs(ips);
             setTotalPages(Math.ceil(ips.length / IPsPerPage));
         } catch (error) {
-            console.error('IP listesi yüklenirken hata oluştu:', error);
-            setErrorMessage('IP listesi yüklenirken bir hata oluştu.');
+            const message = 'IP listesi yüklenirken hata oluştu: ' + error.message;
+            console.error(message);
+            setErrorMessage(message);
         } finally {
             setLoading(false);
         }

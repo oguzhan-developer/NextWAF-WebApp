@@ -886,6 +886,51 @@ app.get("/api/check-ip-reputation", async (req, res) => {
   }
 });
 
+// Kullanıcı Çıkış endpoint'i
+app.post("/api/logout", (req, res) => {
+  const { username } = req.body;
+
+  if (!username) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "Kullanıcı adı belirtilmelidir."
+    });
+  }
+
+  // Kullanıcının aktif durumunu güncelle
+  const query = `UPDATE users SET active = 0 WHERE username = ?`;
+  
+  connection.query(query, [username], (err, results) => {
+    if (err) {
+      console.error("Çıkış işlemi sırasında hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    if (results.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Kullanıcı bulunamadı" });
+    }
+    
+    res.json({ success: true, message: "Başarıyla çıkış yapıldı" });
+  });
+});
+
+// Aktif kullanıcıları getir
+app.get("/api/active-users", (req, res) => {
+  const query = `SELECT id, username, email, full_name, son_giris FROM users WHERE active = 1`;
+  
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error("Aktif kullanıcılar çekilirken hata oluştu: ", err);
+      return res.status(500).json({ success: false, message: "Sunucu hatası" });
+    }
+    
+    res.json({ 
+      success: true, 
+      users: results || [] 
+    });
+  });
+});
+
 initializeLastCheckedLogId();
 
 // Başlangıçta bir kez çalıştır

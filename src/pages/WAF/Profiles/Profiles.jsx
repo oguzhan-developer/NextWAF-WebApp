@@ -185,7 +185,6 @@ function Profiles() {
                                         <Table.Cell>
                                             {profile.active ? (
                                                 <Label color='green' className="status-label">
-                                                    <Icon name='circle' />
                                                     Aktif
                                                 </Label>
                                             ) : (

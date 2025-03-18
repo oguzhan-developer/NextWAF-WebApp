@@ -411,7 +411,7 @@ export const deleteUser = async (id) => {
 // Logout fonksiyonu
 export const logout = async (username) => {
   try {
-    const response = await axios.post(`http://localhost:${dbPort}/api/logout`, { username });
+    const response = await axios.post(`http://${dbIP}:${dbPort}/api/logout`, { username });
     return response.data;
   } catch (error) {
     console.error('Çıkış yaparken hata oluştu:', error);

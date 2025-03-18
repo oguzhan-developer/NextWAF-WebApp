@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Segment, Header, Table, Button, Icon, Input, Form, Message, Confirm, Pagination, Popup, Modal } from 'semantic-ui-react';
 import { fetchBlockedIPs, blockIP, unblockIP } from '../../../utils/api';
+import { useNavigate } from 'react-router-dom';
 import './IPBlock.css';
 
 function IPBlock() {
+    const navigate = useNavigate();
     const [blockedIPs, setBlockedIPs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newIP, setNewIP] = useState('');
@@ -15,11 +17,28 @@ function IPBlock() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [modalOpen, setModalOpen] = useState(false);
+    const [reputationModalOpen, setReputationModalOpen] = useState(false);
+    const [reputationIP, setReputationIP] = useState('');
+    const [reputationError, setReputationError] = useState('');
 
     const IPsPerPage = 10;
 
     useEffect(() => {
         loadBlockedIPs();
+        
+        // URL'den engelleme parametresini al
+        const params = new URLSearchParams(location.search);
+        const blockIp = params.get('block');
+        
+        // Eğer engelleme parametresi varsa modalı aç ve IP'yi doldur
+        if (blockIp) {
+            setNewIP(blockIp);
+            setBlockReason('Kötü itibar nedeniyle engellendi');
+            setModalOpen(true);
+            
+            // URL'yi temizle
+            navigate('/waf/ipblock', { replace: true });
+        }
     }, []);
 
     const loadBlockedIPs = async () => {
@@ -147,6 +166,26 @@ function IPBlock() {
         setModalOpen(true);
     };
 
+    const openReputationModal = () => {
+        setReputationIP('');
+        setReputationError('');
+        setReputationModalOpen(true);
+    };
+
+    const handleReputationIPChange = (e) => {
+        setReputationIP(e.target.value);
+    };
+
+    const handleCheckReputation = () => {
+        if (!validateIPAddress(reputationIP)) {
+            setReputationError('Geçerli bir IPv4 adresi girmelisiniz.');
+            return;
+        }
+
+        // IP itibar kontrolü sayfasına yönlendir
+        navigate(`/waf/ip-reputation?ip=${reputationIP}`);
+    };
+
     // Sayfa için verileri filtrele
     const paginatedIPs = blockedIPs.slice((page - 1) * IPsPerPage, page * IPsPerPage);
 
@@ -170,6 +209,14 @@ function IPBlock() {
                 )}
                 
                 <div className="action-bar">
+                    <Button 
+                        color="blue"
+                        onClick={openReputationModal}
+                        className="reputation-btn"
+                    >
+                        <Icon name="search" />
+                        IP İtibar Kontrolü
+                    </Button>
                     <Button 
                         primary
                         onClick={openBlockModal}
@@ -308,6 +355,51 @@ function IPBlock() {
                     </Modal.Actions>
                 </Modal>
                 
+                {/* IP İtibar Kontrolü Modal */}
+                <Modal
+                    open={reputationModalOpen}
+                    onClose={() => setReputationModalOpen(false)}
+                    size="small"
+                >
+                    <Modal.Header>IP İtibar Kontrolü</Modal.Header>
+                    <Modal.Content>
+                        <p>
+                            Kontrol etmek istediğiniz IP adresini girin. IP adresinin itibarını, coğrafi konumunu 
+                            ve güvenlik bilgilerini görüntülemek için yönlendirileceksiniz.
+                        </p>
+                        <Form>
+                            <Form.Field>
+                                <label>IP Adresi</label>
+                                <Input 
+                                    placeholder="IP adresini girin (örn: 8.8.8.8)"
+                                    value={reputationIP}
+                                    onChange={handleReputationIPChange}
+                                    fluid
+                                />
+                            </Form.Field>
+                            
+                            {reputationError && (
+                                <Message negative>
+                                    <p>{reputationError}</p>
+                                </Message>
+                            )}
+                        </Form>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={() => setReputationModalOpen(false)}>
+                            İptal
+                        </Button>
+                        <Button 
+                            color="blue" 
+                            onClick={handleCheckReputation}
+                            disabled={!reputationIP}
+                        >
+                            <Icon name="search" />
+                            İtibarı Kontrol Et
+                        </Button>
+                    </Modal.Actions>
+                </Modal>
+
                 {/* Engel Kaldırma Onay Modal */}
                 <Confirm
                     open={confirmOpen}

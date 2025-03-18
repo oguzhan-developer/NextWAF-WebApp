@@ -799,6 +799,93 @@ app.post("/api/block-attack-source", async (req, res) => {
   });
 });
 
+// AbuseIPDB API anahtarı - üretimde .env dosyasına taşıyın
+const ABUSE_IPDB_API_KEY = process.env.ABUSE_IPDB_API_KEY || "560295a57ef16781f161d3b9e5417603209295ed4552f13152dcd4a91b16427e91605a9bf69e3f61"; 
+
+// IP itibarını kontrol et (AbuseIPDB API ve ipinfo.io API proxy)
+app.get("/api/check-ip-reputation", async (req, res) => {
+  const { ip } = req.query;
+  
+  if (!ip) {
+    return res.status(400).json({ 
+      success: false, 
+      message: "IP adresi belirtilmelidir."
+    });
+  }
+  
+  try {
+    console.log(`IP itibar kontrolü yapılıyor: ${ip}`);
+    
+    // AbuseIPDB API isteği
+    const abuseResponse = await axios.get('https://api.abuseipdb.com/api/v2/check', {
+      params: {
+        ipAddress: ip,
+        maxAgeInDays: 90,
+        verbose: true
+      },
+      headers: {
+        'Key': ABUSE_IPDB_API_KEY,
+        'Accept': 'application/json'
+      },
+      timeout: 10000 // 10 saniye timeout
+    });
+    
+    console.log("AbuseIPDB yanıt durumu:", abuseResponse.status);
+    console.log("responsee:",abuseResponse);
+    
+    // ipinfo.io API isteği (ücretsiz katman için token)
+    // const geoResponse = await axios.get(`https://ipinfo.io/${ip}/json?token=d71467d36cd144`, {
+    //   timeout: 10000 // 10 saniye timeout
+    // });
+    
+    // console.log("ipinfo.io yanıt durumu:", geoResponse.status);
+    
+    // Sonuçları birleştir
+    const combinedData = {
+      abuse: abuseResponse.data.data,
+      // geo: geoResponse.data
+    };
+    
+    console.log("Birleştirilmiş veri hazırlandı, yanıt gönderiliyor");
+    
+    res.json({
+      success: true,
+      ...combinedData
+    });
+  } catch (error) {
+    console.error('IP itibar bilgileri alınırken hata oluştu:', error.message);
+    
+    if (error.response) {
+      console.error('API yanıt detayları:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      });
+    }
+    
+    let errorMessage = 'IP itibar bilgileri alınırken bir hata oluştu';
+    
+    // API yanıt hatalarını işle
+    if (error.response) {
+      // API'den gelen hata durumu
+      if (error.response.data && error.response.data.errors) {
+        errorMessage = `API hatası: ${error.response.data.errors.join(', ')}`;
+      } else {
+        errorMessage = `API yanıt hatası: ${error.response.status} - ${error.response.statusText}`;
+      }
+    } else if (error.request) {
+      errorMessage = `API isteği yapıldı ama yanıt alınamadı: ${error.message}`;
+    } else {
+      errorMessage = `İstek oluşturulurken hata: ${error.message}`;
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: errorMessage
+    });
+  }
+});
+
 initializeLastCheckedLogId();
 
 // Başlangıçta bir kez çalıştır

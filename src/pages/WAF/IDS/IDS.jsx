@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Segment, Header, Table, Icon, Button, Divider, Statistic, Popup, Modal } from 'semantic-ui-react';
 import { changeIDSLogStatus, fetchIDSLogs, removeIDSLog, blockIP, blockAttackSource } from '../../../utils/api';
+import { useNavigate } from 'react-router-dom'; // Add this import
 import './IDS.css';
 
 function IDS() {
+    const navigate = useNavigate(); // Add this line to define navigate
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [blockModalOpen, setBlockModalOpen] = useState(false);
@@ -33,6 +35,10 @@ function IDS() {
         setSelectedIP(ip);
         setBlockModalOpen(true);
         setBlockMessage({ type: '', content: '' });
+    };
+    
+    const handleReputationCheck = (ip) => {
+        navigate(`/waf/ip-reputation?ip=${ip}`);
     };
 
     const handleBlockIP = async () => {
@@ -265,11 +271,10 @@ function IDS() {
                     onClose={() => setBlockModalOpen(false)}
                     size="small"
                 >
-                    <Modal.Header>IP Adresi Engelleme</Modal.Header>
+                    <Modal.Header>IP Adresi İşlemleri</Modal.Header>
                     <Modal.Content>
                         <p>
-                            <strong>{selectedIP}</strong> IP adresini engellemek istediğinize emin misiniz?
-                            Bu adres, sisteme erişmeye çalıştığında paketler düşürülecektir.
+                            <strong>{selectedIP}</strong> IP adresi için yapmak istediğiniz işlemi seçiniz.
                         </p>
                         
                         {blockMessage.type && (
@@ -286,6 +291,13 @@ function IDS() {
                     <Modal.Actions>
                         <Button onClick={() => setBlockModalOpen(false)}>
                             İptal
+                        </Button>
+                        <Button 
+                            color="blue" 
+                            onClick={() => handleReputationCheck(selectedIP)}
+                        >
+                            <Icon name="search" />
+                            IP İtibar Kontrolü
                         </Button>
                         <Button 
                             negative 

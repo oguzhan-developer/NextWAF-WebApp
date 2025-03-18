@@ -9,6 +9,7 @@ import IDS from './pages/WAF/IDS/IDS';
 import Profiles from './pages/WAF/Profiles/Profiles';
 import EditProfile from './pages/WAF/Profiles/EditProfile';
 import IPBlock from './pages/WAF/IPBlock/IPBlock';
+import IPReputation from './pages/WAF/IPReputation/IPReputation';
 
 import './index.css'
 import { getCookieJSON } from './utils/cookie';
@@ -35,6 +36,7 @@ function App() {
           <Route path="profiles/edit/:id" element={<EditProfile />} />
           <Route path="profiles/new" element={<EditProfile />} />
           <Route path="ipblock" element={<IPBlock />} />
+          <Route path="ip-reputation" element={<IPReputation />} />
         </Route>
         
         <Route path="*" element={<Navigate to="/" />} />

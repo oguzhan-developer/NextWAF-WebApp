@@ -37,16 +37,12 @@ function Menu() {
         try {
             const user = getCookieJSON("user");
             if (user) {
-                // Sunucuya çıkış bildirimini gönder
                 await logout(user.username);
             }
         } catch (error) {
             console.error("Çıkış yaparken hata oluştu:", error);
         } finally {
-            // Cookie temizleme işlemi (zaten mevcut)
             removeCookie('user');
-            
-            // Kullanıcıyı login sayfasına yönlendir (zaten mevcut)
             window.location.href = "/login";
         }
     };
@@ -62,9 +58,9 @@ function Menu() {
             </div>
             <div className="menu-items">
                 <div className="menu-item user-info" onClick={toggleDropdown}>
-                    <img src={i_profile} id='profile_icon' />
+                    {/* <img src={i_profile} id='profile_icon' /> */}
                     <strong id='username_text'>{username}</strong>
-                    <img src={i_arrow_down} style={{width:"13px", marginLeft:"0.15rem"}} />
+                    <img src={i_arrow_down} id='arrow_icon' />
                     {dropdownOpen && (
                         <div className="dropdown-content">
                             <Link to="/waf/profiles" className="dropdown-item" onClick={() => setDropdownOpen(false)}>

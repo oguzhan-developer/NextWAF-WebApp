@@ -286,3 +286,31 @@
 .message .icon {
     margin-right: 8px;
 }
+
+/* Modal buton düzeni */
+.ui.modal .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Modal içindeki mesaj kutusu */
+.ui.modal .message {
+    margin-top: 15px;
+}
+
+/* IP işlemleri modal başlığı */
+.ui.modal .header:contains('IP Adresi İşlemleri') {
+    background-color: #f8f9fa;
+    color: #2185d0;
+    border-bottom: 1px solid rgba(34, 36, 38, 0.1);
+}
+
+/* IP vurgusu */
+.modal-ip-address {
+    font-family: monospace;
+    font-weight: bold;
+    background-color: rgba(33, 133, 208, 0.1);
+    padding: 2px 5px;
+    border-radius: 3px;
+}

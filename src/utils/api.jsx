@@ -477,6 +477,29 @@ export async function blockAttackSource(logId) {
   }
 }
 
+// IP itibar kontrolü
+export async function checkIPReputation(ipAddress) {
+  try {
+    console.log(`IP itibar kontrolü için istek yapılıyor: ${ipAddress}`);
+    // IP itibarını sunucu üzerinden kontrol et (CORS sorununu önlemek için)
+    const response = await axios.get(`http://${dbIP}:${dbPort}/api/check-ip-reputation`, {
+      params: { ip: ipAddress },
+      timeout: 15000 // 15 saniye timeout
+    });
+    
+    console.log("IP itibar kontrolü yanıtı alındı");
+    console.log(response);
+    
+    return response.data;
+  } catch (error) {
+    console.error('IP itibar bilgileri alınırken hata oluştu:', error);
+    if (error.response) {
+      console.error('Hata detayları:', error.response.data);
+    }
+    throw error;
+  }
+}
+
 
 
 

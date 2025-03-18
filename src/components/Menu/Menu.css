@@ -91,6 +91,11 @@
 }
 
 #username_text{
+    font-size: medium;
     margin:0 0.2rem;
     letter-spacing: 0.04rem;
+}
+#arrow_icon{
+    width: 14px;
+    margin-left: 0.15rem; 
 }

@@ -38,7 +38,12 @@
 .action-bar {
     margin: 1rem 0;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between; /* Değiştirildi: flex-end -> space-between */
+    align-items: center;
+}
+
+.reputation-btn {
+    margin-right: 8px !important;
 }
 
 .reason-cell {

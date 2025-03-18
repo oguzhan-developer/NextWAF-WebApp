@@ -1,0 +1,250 @@
+.ipreputation-page {
+    margin-top: 6rem !important;
+    padding: 20px 0;
+}
+
+.reputation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.ip-target-container {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-left: 4px solid #2185d0;
+}
+
+.ip-highlight {
+    font-family: monospace;
+    font-weight: bold;
+    color: #2185d0;
+    background-color: rgba(33, 133, 208, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+}
+
+.loading-container {
+    padding: 3rem 0;
+    text-align: center;
+}
+
+.results-container {
+    margin-top: 2rem;
+}
+
+.reputation-score-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.score-circle.green {
+    background-color: rgba(33, 186, 69, 0.2);
+    border: 4px solid #21ba45;
+}
+
+.score-circle.yellow {
+    background-color: rgba(251, 189, 8, 0.2);
+    border: 4px solid #fbbd08;
+}
+
+.score-circle.orange {
+    background-color: rgba(242, 113, 28, 0.2);
+    border: 4px solid #f2711c;
+}
+
+.score-circle.red {
+    background-color: rgba(219, 40, 40, 0.2);
+    border: 4px solid #db2828;
+}
+
+.score-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.score-circle.green .score-text {
+    color: #21ba45;
+}
+
+.score-circle.yellow .score-text {
+    color: #fbbd08;
+}
+
+.score-circle.orange .score-text {
+    color: #f2711c;
+}
+
+.score-circle.red .score-text {
+    color: #db2828;
+}
+
+.score-description {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+.risk-level {
+    margin-left: 0.5rem;
+    font-weight: bold;
+}
+
+.risk-level.green {
+    color: #21ba45;
+}
+
+.risk-level.yellow {
+    color: #fbbd08;
+}
+
+.risk-level.orange {
+    color: #f2711c;
+}
+
+.risk-level.red {
+    color: #db2828;
+}
+
+.blacklist-warning {
+    margin-top: 0.5rem;
+    color: #db2828;
+    font-weight: bold;
+}
+
+.info-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.info-sections .ui.segment {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.info-table {
+    margin-top: 1rem !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.info-table td:first-child {
+    font-weight: 600;
+}
+
+.positive-status {
+    color: #21ba45;
+    font-weight: bold;
+}
+
+.negative-status {
+    color: #db2828;
+    font-weight: bold;
+}
+
+.no-results {
+    padding: 2rem 0;
+}
+
+.api-key-form {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.action-buttons {
+    margin-top: 1rem;
+}
+
+.category-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.category-item {
+    display: inline-block;
+    background-color: #f3f4f5;
+    padding: 3px 8px;
+    margin: 0;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+.report-details {
+    margin-top: 2rem;
+}
+
+.reports-table {
+    margin-bottom: 1.5rem !important;
+}
+
+.recent-reports-title {
+    margin-top: 1.5rem !important;
+}
+
+.recent-reports {
+    margin-top: 1rem;
+}
+
+.more-reports-note {
+    margin-top: 0.5rem;
+    color: #767676;
+    font-size: 0.9em;
+}
+
+.whois-data {
+    max-height: 300px;
+    overflow: auto;
+    background-color: #f3f4f5;
+    padding: 1rem;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+}
+
+.data-attribution {
+    margin-top: 2rem;
+    color: #767676;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+    .info-sections {
+        grid-template-columns: 1fr;
+    }
+    
+    .score-circle {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .score-text {
+        font-size: 2rem;
+    }
+}

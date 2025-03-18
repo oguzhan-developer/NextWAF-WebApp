@@ -364,8 +364,7 @@ function IPBlock() {
                     <Modal.Header>IP İtibar Kontrolü</Modal.Header>
                     <Modal.Content>
                         <p>
-                            Kontrol etmek istediğiniz IP adresini girin. IP adresinin itibarını, coğrafi konumunu 
-                            ve güvenlik bilgilerini görüntülemek için yönlendirileceksiniz.
+                            Kontrol etmek istediğiniz IP adresini girin.
                         </p>
                         <Form>
                             <Form.Field>

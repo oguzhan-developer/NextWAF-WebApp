@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Segment, Header, Table, Button, Icon, Loader, Divider, Confirm, Message } from 'semantic-ui-react';
 import { fetchUsers, deleteUser } from '../../../utils/api';
+import { getCookieJSON, removeCookie } from '../../../utils/cookie'; // Cookie işlemleri için eklendi
 import './Profiles.css';
 
 function Profiles() {
@@ -10,9 +11,16 @@ function Profiles() {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [message, setMessage] = useState({ content: '', type: '' });
+    const [currentUser, setCurrentUser] = useState(null); // Mevcut kullanıcıyı izlemek için
 
     useEffect(() => {
         loadProfiles();
+        
+        // Mevcut kullanıcının bilgilerini al
+        const user = getCookieJSON("user");
+        if (user) {
+            setCurrentUser(user);
+        }
     }, []);
 
     const loadProfiles = async () => {
@@ -35,17 +43,32 @@ function Profiles() {
         try {
             setLoading(true);
             const result = await deleteUser(selectedUserId);
+            
             if (result.success) {
                 setMessage({
                     content: 'Kullanıcı başarıyla silindi',
                     type: 'success'
                 });
                 
-                setTimeout(() => {
-                    setMessage({ content: '', type: '' });
-                }, 1600);
-                
-                loadProfiles();
+                // Kullanıcı kendi hesabını sildiyse cookie'yi sil ve çıkış yap
+                if (currentUser && currentUser.id === selectedUserId) {
+                    setTimeout(() => {
+                        removeCookie('user');
+                        window.location.href = "/login"; // Login sayfasına yönlendir
+                    }, 1500);
+                    
+                    setMessage({
+                        content: 'Hesabınız silindi, çıkış yapılıyor...',
+                        type: 'success'
+                    });
+                } else {
+                    // Başka bir hesabı sildiyse normal işleme devam et
+                    setTimeout(() => {
+                        setMessage({ content: '', type: '' });
+                    }, 1600);
+                    
+                    loadProfiles();
+                }
             } else {
                 setMessage({
                     content: result.message || 'Kullanıcı silinirken bir hata oluştu',
@@ -176,6 +199,8 @@ function Profiles() {
                                                     basic 
                                                     color="red"
                                                     onClick={() => handleDeleteClick(profile.id)}
+                                                    disabled={users.length === 1} // Eğer tek kullanıcı kaldıysa silme işlemini devre dışı bırak
+                                                    title={users.length === 1 ? "Son kullanıcı silinemez" : ""}
                                                 >
                                                     Kaldır
                                                 </Button>
@@ -191,12 +216,21 @@ function Profiles() {
                 <Confirm
                     open={confirmOpen}
                     header="Kullanıcı Silme"
-                    content="Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!"
-                    confirmButton="Evet, Sil"
+                    content={
+                        currentUser && currentUser.id === selectedUserId 
+                            ? "Kendi hesabınızı silmek istediğinize emin misiniz? Bu işlem sonrasında otomatik olarak çıkış yapılacaktır."
+                            : "Bu kullanıcıyı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!"
+                    }
+                    confirmButton={
+                        currentUser && currentUser.id === selectedUserId 
+                            ? "Evet, Hesabımı Sil ve Çıkış Yap"
+                            : "Evet, Sil"
+                    }
                     cancelButton="İptal"
                     onCancel={handleCancelDelete}
                     onConfirm={handleConfirmDelete}
-                    size="mini"
+                    size={currentUser && currentUser.id === selectedUserId ? "small" : "mini"}
+                    className={currentUser && currentUser.id === selectedUserId ? "wider-confirm-dialog" : ""}
                 />
             </Segment>
         </div>

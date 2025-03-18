@@ -68,3 +68,36 @@
 .back-button {
     margin-bottom: 1.5rem !important;
 }
+
+/* Onay dialog boyutu düzenlemeleri */
+.wider-confirm-dialog .actions {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-end !important;
+}
+
+.wider-confirm-dialog .actions .button {
+    margin-left: 0.5rem !important;
+}
+
+.ui.small.modal.wider-confirm-dialog {
+    width: 500px !important;
+}
+
+.wider-confirm-dialog .ui.red.button {
+    min-width: 240px !important;
+}
+
+/* Modal içeriği için padding artırımı */
+.wider-confirm-dialog .content {
+    padding: 2rem 1.5rem !important;
+    font-size: 1.1rem !important;
+    text-align: center !important;
+}
+
+/* Modal header için stil */
+.wider-confirm-dialog .header {
+    font-size: 1.3rem !important;
+    text-align: center !important;
+    padding: 1.25rem 1.5rem !important;
+}

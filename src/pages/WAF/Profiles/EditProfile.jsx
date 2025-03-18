@@ -113,7 +113,7 @@ function EditProfile() {
                 <Divider />
                 
                 <Link to="/waf/profiles" className="back-button">
-                    <Button icon labelPosition="left">
+                    <Button labelPosition="left">
                         <Icon name="arrow left" />
                         Geri Dön
                     </Button>

@@ -90,7 +90,6 @@ function EditProfile() {
                 setSuccess('Profil başarıyla güncellendi.');
             }
             
-            // 1.5 saniye sonra profiller sayfasına dön
             setTimeout(() => {
                 navigate('/waf/profiles');
             }, 1500);

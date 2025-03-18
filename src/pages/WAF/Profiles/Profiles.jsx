@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Segment, Header, Table, Button, Icon, Loader, Divider, Confirm, Message } from 'semantic-ui-react';
+import { Segment, Header, Table, Button, Icon, Loader, Divider, Confirm, Message, Label } from 'semantic-ui-react';
 import { fetchUsers, deleteUser } from '../../../utils/api';
-import { getCookieJSON, removeCookie } from '../../../utils/cookie'; // Cookie işlemleri için eklendi
+import { getCookieJSON, removeCookie } from '../../../utils/cookie'; 
 import './Profiles.css';
 
 function Profiles() {
@@ -11,12 +11,11 @@ function Profiles() {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [message, setMessage] = useState({ content: '', type: '' });
-    const [currentUser, setCurrentUser] = useState(null); // Mevcut kullanıcıyı izlemek için
+    const [currentUser, setCurrentUser] = useState(null); 
 
     useEffect(() => {
         loadProfiles();
         
-        // Mevcut kullanıcının bilgilerini al
         const user = getCookieJSON("user");
         if (user) {
             setCurrentUser(user);
@@ -50,11 +49,10 @@ function Profiles() {
                     type: 'success'
                 });
                 
-                // Kullanıcı kendi hesabını sildiyse cookie'yi sil ve çıkış yap
                 if (currentUser && currentUser.id === selectedUserId) {
                     setTimeout(() => {
                         removeCookie('user');
-                        window.location.href = "/login"; // Login sayfasına yönlendir
+                        window.location.href = "/login"; 
                     }, 1500);
                     
                     setMessage({
@@ -62,7 +60,6 @@ function Profiles() {
                         type: 'success'
                     });
                 } else {
-                    // Başka bir hesabı sildiyse normal işleme devam et
                     setTimeout(() => {
                         setMessage({ content: '', type: '' });
                     }, 1600);
@@ -95,10 +92,7 @@ function Profiles() {
     const formatDateTime = (timestamp) => {
         if (!timestamp) return 'Hiç giriş yapmadı';
         
-        // Tarih nesnesini oluştur
         const date = new Date(timestamp);
-        
-        // Tarih yerel saat dilimine göre ayarlanıyor
         return new Intl.DateTimeFormat('tr-TR', {
             year: 'numeric',
             month: '2-digit',
@@ -154,6 +148,7 @@ function Profiles() {
                                 <Table.HeaderCell>E-posta</Table.HeaderCell>
                                 <Table.HeaderCell>Kayıt Olma Tarihi</Table.HeaderCell>
                                 <Table.HeaderCell>Son Giriş Tarihi</Table.HeaderCell>
+                                <Table.HeaderCell>Durum</Table.HeaderCell>
                                 <Table.HeaderCell>Aksiyon</Table.HeaderCell>
                             </Table.Row>
                         </Table.Header>
@@ -161,7 +156,7 @@ function Profiles() {
                         <Table.Body>
                             {loading ? (
                                 <Table.Row>
-                                    <Table.Cell colSpan="7" textAlign="center">
+                                    <Table.Cell colSpan="8" textAlign="center">
                                         <div className="loading-indicator">
                                             <Loader active inline="centered" />
                                             Profiller yükleniyor...
@@ -170,13 +165,13 @@ function Profiles() {
                                 </Table.Row>
                             ) : users.length === 0 ? (
                                 <Table.Row>
-                                    <Table.Cell colSpan="7" textAlign="center">
+                                    <Table.Cell colSpan="8" textAlign="center">
                                         Hiç kullanıcı profili bulunamadı.
                                     </Table.Cell>
                                 </Table.Row>
                             ) : (
                                 users.map(profile => (
-                                    <Table.Row key={profile.id}>
+                                    <Table.Row key={profile.id} className={profile.active ? "active-user-row" : ""}>
                                         <Table.Cell>{profile.id}</Table.Cell>
                                         <Table.Cell>{profile.full_name || '-'}</Table.Cell>
                                         <Table.Cell>{profile.username}</Table.Cell>
@@ -186,6 +181,18 @@ function Profiles() {
                                         </Table.Cell>
                                         <Table.Cell className="last-login">
                                             {formatDateTime(profile.son_giris)}
+                                        </Table.Cell>
+                                        <Table.Cell>
+                                            {profile.active ? (
+                                                <Label color='green' className="status-label">
+                                                    <Icon name='circle' />
+                                                    Aktif
+                                                </Label>
+                                            ) : (
+                                                <Label className="status-label" color='grey'>
+                                                    Çevrimdışı
+                                                </Label>
+                                            )}
                                         </Table.Cell>
                                         <Table.Cell>
                                             <div className="profile-actions">
@@ -199,7 +206,7 @@ function Profiles() {
                                                     basic 
                                                     color="red"
                                                     onClick={() => handleDeleteClick(profile.id)}
-                                                    disabled={users.length === 1} // Eğer tek kullanıcı kaldıysa silme işlemini devre dışı bırak
+                                                    disabled={users.length === 1}
                                                     title={users.length === 1 ? "Son kullanıcı silinemez" : ""}
                                                 >
                                                     Kaldır

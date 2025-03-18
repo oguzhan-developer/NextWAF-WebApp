@@ -69,7 +69,6 @@
     margin-bottom: 1.5rem !important;
 }
 
-/* Onay dialog boyutu düzenlemeleri */
 .wider-confirm-dialog .actions {
     display: flex !important;
     flex-direction: row !important;
@@ -95,9 +94,40 @@
     text-align: center !important;
 }
 
-/* Modal header için stil */
 .wider-confirm-dialog .header {
     font-size: 1.3rem !important;
     text-align: center !important;
     padding: 1.25rem 1.5rem !important;
+}
+
+/* Aktif kullanıcı satırı vurgusu */
+.active-user-row {
+    background-color: rgba(33, 186, 69, 0.05) !important;
+}
+
+.active-user-row:hover {
+    background-color: rgba(33, 186, 69, 0.1) !important;
+}
+
+.status-label {
+    white-space: nowrap;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-label.ui.green.label {
+    background-color: rgba(33, 186, 69, 0.15) !important;
+    color: #21ba45 !important;
+}
+
+.status-label.ui.grey.label {
+    background-color: rgba(118, 118, 118, 0.1) !important;
+    color: #767676 !important;
+}
+
+.status-label i.circle.icon {
+    margin-right: 4px !important;
+    font-size: 0.7em !important;
+    margin-bottom: 0 !important;
 }

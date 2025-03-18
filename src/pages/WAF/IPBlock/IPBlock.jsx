@@ -26,17 +26,14 @@ function IPBlock() {
     useEffect(() => {
         loadBlockedIPs();
         
-        // URL'den engelleme parametresini al
         const params = new URLSearchParams(location.search);
         const blockIp = params.get('block');
         
-        // Eğer engelleme parametresi varsa modalı aç ve IP'yi doldur
         if (blockIp) {
             setNewIP(blockIp);
             setBlockReason('Kötü itibar nedeniyle engellendi');
             setModalOpen(true);
             
-            // URL'yi temizle
             navigate('/waf/ipblock', { replace: true });
         }
     }, []);
@@ -64,15 +61,12 @@ function IPBlock() {
     };
 
     const validateIPAddress = (ip) => {
-        // IPv4 adresi için düzenli ifade
         const ipv4Regex = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
         
-        // IP adresi formatını kontrol et
         if (!ipv4Regex.test(ip)) {
             return false;
         }
         
-        // Her bölümün 0-255 arasında olup olmadığını kontrol et
         const parts = ip.split('.');
         for (let i = 0; i < 4; i++) {
             const part = parseInt(parts[i], 10);
@@ -88,13 +82,11 @@ function IPBlock() {
         setErrorMessage('');
         setSuccessMessage('');
         
-        // IP adresinin geçerli olup olmadığını kontrol et
         if (!validateIPAddress(newIP)) {
             setErrorMessage('Geçerli bir IPv4 adresi girmelisiniz.');
             return;
         }
         
-        // IP adresinin zaten engellenmiş olup olmadığını kontrol et
         if (blockedIPs.some(ip => ip.address === newIP)) {
             setErrorMessage('Bu IP adresi zaten engellenmiş durumda.');
             return;
@@ -182,11 +174,9 @@ function IPBlock() {
             return;
         }
 
-        // IP itibar kontrolü sayfasına yönlendir
         navigate(`/waf/ip-reputation?ip=${reputationIP}`);
     };
 
-    // Sayfa için verileri filtrele
     const paginatedIPs = blockedIPs.slice((page - 1) * IPsPerPage, page * IPsPerPage);
 
     return (
@@ -304,7 +294,6 @@ function IPBlock() {
                     </Table>
                 </div>
                 
-                {/* IP Engelleme Modal */}
                 <Modal
                     open={modalOpen}
                     onClose={() => setModalOpen(false)}
@@ -355,7 +344,6 @@ function IPBlock() {
                     </Modal.Actions>
                 </Modal>
                 
-                {/* IP İtibar Kontrolü Modal */}
                 <Modal
                     open={reputationModalOpen}
                     onClose={() => setReputationModalOpen(false)}

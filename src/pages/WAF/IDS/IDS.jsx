@@ -221,7 +221,7 @@ function IDS() {
                                         <Table.Cell className={log.checked ? "" : "negative"}>
                                             <div className='durum-div'>
                                                 <span className={`status ${log.checked ? 'checked' : 'unchecked'}`}>
-                                                    {log.checked ? "Kontrol edildi" : "Kontrol edilmedi"}
+                                                    {log.checked ? "Kontrol edildi" : "Beklemede"}
                                                 </span>
 
                                                 {

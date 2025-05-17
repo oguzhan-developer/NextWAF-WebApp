@@ -276,7 +276,7 @@ app.put("/api/users/:id", (req, res) => {
     query = `UPDATE users SET username = ?, email = ?, full_name = ?, password = ? WHERE id = ?`;
     params = [username, email, full_name, hashedPassword, id];
   } else {
-    query = `UPDATE users SET username = ?, email = ?, full_name = ?, WHERE id = ?`;
+    query = `UPDATE users SET username = ?, email = ?, full_name = ? WHERE id = ?`;
     params = [username, email, full_name, id];
   }
 

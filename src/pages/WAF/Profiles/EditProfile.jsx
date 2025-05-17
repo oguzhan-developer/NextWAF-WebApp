@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Segment, Header, Form, Button, Checkbox, Divider, Icon, Message } from 'semantic-ui-react';
 import { fetchProfileDetails, updateProfile, createProfile } from '../../../utils/api';
 import './Profiles.css';
+import { getCookieJSON, setCookie } from '../../../utils/cookie';
 
 function EditProfile() {
     const { id } = useParams();
@@ -80,14 +81,23 @@ function EditProfile() {
             const profileData = { ...profile };
             if (changePassword) {
                 profileData.password = password;
+            }else {
+                delete profileData.password; // Parola değiştirilmiyecekse db ye gönderilmemesi gerekiyor, çünkü her update fonks çağrıldığında parolayı güncelliyor. Tekrar tekrar hashlenmesine sebep oluyor.
+                console.log("buraya girdi");
+                
             }
             
             if (isNewProfile) {
                 await createProfile(profileData);
                 setSuccess('Profil başarıyla oluşturuldu.');
             } else {
+                console.log("profileData", profileData);
+                
                 await updateProfile(id, profileData);
                 setSuccess('Profil başarıyla güncellendi.');
+                const currentUser = getCookieJSON('user');
+                const newUser = {...currentUser, ...profileData}
+                setCookie('user', JSON.stringify(newUser), { expires: 1 });
             }
             
             setTimeout(() => {
@@ -162,7 +172,7 @@ function EditProfile() {
                     {!isNewProfile && (
                         <div className="change-password-toggle">
                             <Checkbox 
-                                label="Şifreyi değiştir"
+                                label="Parolayı Değiştir"
                                 checked={changePassword}
                                 onChange={(e, data) => setChangePassword(data.checked)}
                             />

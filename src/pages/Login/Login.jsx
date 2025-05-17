@@ -41,7 +41,7 @@ function Login() {
                         <label id='top_label_login'>Yönetici Girişi</label>
                         <form id='form' onSubmit={handleLogin}>
                             <input className='input' placeholder='Kullanıcı Adı' label="Kullanıcı Adı" value={username} onChange={(e) => setUsername(e.target.value)} required />
-                            <input className='input' placeholder='Parola' label="Parola" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                            <input className='input' placeholder='Parola' type='password' label="Parola" value={password} onChange={(e) => setPassword(e.target.value)} required />
                             <Button size='small' color='teal' id='login_btn' type='submit'>Giriş yap</Button>
                         </form>
                         <div className="error-message-container">

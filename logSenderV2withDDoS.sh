@@ -2,7 +2,7 @@
 
 MYSQL_USER="admin"
 MYSQL_PASSWORD="rootroot"
-MYSQL_HOST="172.20.10.14"
+MYSQL_HOST="172.20.10.4"
 MYSQL_DB="NextWAF"
 MYSQL_TABLE="logs"
 IDS_TABLE="idsLogs"
@@ -124,7 +124,7 @@ check_attacks() {
         insert_ids_log "$timestamp" "XSS" "$ip" "$uri" "$user_agent" "$status"
     fi
 
-    if echo "$uri" | grep -iE "(select.*from|union.*select|drop.*table|1=1|--|'|%27)"; then
+    if echo "$uri" | grep -iE "(select.*from|union.*select|drop.*table|1=1|--|'|%27|%E2)"; then
         insert_ids_log "$timestamp" "SQL Injection" "$ip" "$uri" "$user_agent" "$status"
     fi
 

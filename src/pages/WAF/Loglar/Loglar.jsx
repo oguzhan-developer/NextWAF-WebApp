@@ -70,10 +70,7 @@ function Loglar() {
     };
 
     const formatDateTime = (timestamp) => {
-        // Tarih nesnesini oluştur
         const date = new Date(timestamp);
-        
-        // Tarih yerel saat dilimine göre ayarlanıyor
         return new Intl.DateTimeFormat('tr-TR', {
             year: 'numeric',
             month: '2-digit',

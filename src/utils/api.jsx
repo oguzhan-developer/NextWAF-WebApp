@@ -3,7 +3,7 @@ import axios from 'axios';
 //pass rootroot
 const dbPort = import.meta.env.VITE_APP_API_PORT || 5058;
 const dbIP = import.meta.env.VITE_APP_DB_IP || "172.20.10.2";
-const system_ip = import.meta.env.VITE_APP_CMD_API_IP || '172.17.0.1';
+const system_ip = import.meta.env.VITE_APP_CMD_API_IP || '172.20.10.4';
 const system_port = import.meta.env.VITE_APP_SYSTEM_PORT || '8080';
 console.log(dbPort);
 

@@ -212,6 +212,7 @@
 .durum-div .status {
     display: flex;
     align-items: center;
+    text-align: center;
     
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Segment, Header, Table, Button, Icon, Loader, Message, Divider } from 'semantic-ui-react';
-import { checkIPReputation } from '../../../utils/api'; // API işlevini ekledik
+import { checkIPReputation } from '../../../utils/api'; 
 import './IPReputation.css';
 
 function IPReputation() {
@@ -13,7 +13,6 @@ function IPReputation() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        // URL'den IP adresini al
         const params = new URLSearchParams(location.search);
         const ip = params.get('ip');
         
@@ -24,7 +23,6 @@ function IPReputation() {
         
         setIpAddress(ip);
         
-        // IP bilgilerini getir
         fetchIPInfo(ip);
     }, [location]);
 
@@ -33,8 +31,6 @@ function IPReputation() {
         setError('');
         
         try {
-            console.log(`${ip} adresi için IP itibar bilgileri isteniyor...`);
-            // API isteğini utils/api.jsx üzerinden yap
             const data = await checkIPReputation(ip);
             
             if (!data || !data.success) {
@@ -48,13 +44,10 @@ function IPReputation() {
             let errorMessage = 'IP itibar bilgileri alınırken bir hata oluştu';
             
             if (error.response) {
-                // Sunucu yanıtında hata
                 errorMessage = `Sunucu hatası: ${error.response.status} - ${error.response?.data?.message || 'Bilinmeyen hata'}`;
             } else if (error.request) {
-                // İstek yapıldı ancak yanıt alınamadı
                 errorMessage = 'Sunucu yanıt vermedi, lütfen internet bağlantınızı kontrol edin';
             } else {
-                // İstek oluşturulurken hata
                 errorMessage = `İstek hatası: ${error.message}`;
             }
             

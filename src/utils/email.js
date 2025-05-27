@@ -7,15 +7,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 dotenv.config({ path: join(__dirname, "../../.env") });
 
-// SMTP ayarlarını kontrol et ve logla
-console.log("===== SMTP Yapılandırması =====");
-console.log(`Host: ${process.env.SMTP_HOST || "smtp.gmail.com"}`);
-console.log(`Port: ${process.env.SMTP_PORT || 587}`);
-console.log(`Secure: ${process.env.SMTP_SECURE === "true"}`);
-console.log(`User: ${process.env.SMTP_USER ? "Tanımlı" : "Tanımlı değil"}`);
-console.log(`Password: ${process.env.SMTP_PASSWORD ? "Tanımlı" : "Tanımlı değil"}`);
-console.log(`Alert Email: ${process.env.ALERT_EMAIL || "Tanımlı değil (Varsayılan olarak oguzhanylcn@mail.com kullanılacak)"}`);
-
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: process.env.SMTP_PORT || 587,
@@ -26,13 +17,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Transporter doğrulama
 transporter.verify()
   .then(() => console.log("SMTP bağlantısı başarılı!"))
   .catch(err => console.error("SMTP bağlantısı başarısız:", err));
 
 export async function sendIDSAlertEmail(log) {
-  // Tarih nesnesi oluşturup Türkçe formatında biçimlendirme
   const date = new Date(log.timestamp);
   const attackDate = new Intl.DateTimeFormat('tr-TR', {
     year: 'numeric',
@@ -123,13 +112,11 @@ export async function sendSystemAlertEmail(alerts, systemStats) {
   console.log("Uyarılar:", JSON.stringify(alerts));
   console.log("Sistem durumu:", JSON.stringify(systemStats));
   
-  // Uyarı türleri için metin oluşturma
   const alertTypesText = alerts.map(a => {
     const usage = typeof a.usage === 'number' ? a.usage.toFixed(1) : a.usage;
     return `${a.resource}: %${usage}`;
   }).join(', ');
   
-  // CPU, RAM ve Disk kullanım değerlerini doğru alanlardan alın
   const cpuUsage = systemStats.CPUYuzdesi;
   const ramUsage = systemStats.RAMYuzdesi;
   const diskUsage = systemStats.diskYuzdesi;
@@ -210,7 +197,6 @@ export async function testEmailConnection() {
   }
 }
 
-// Test e-postası gönderme fonksiyonu
 export async function sendTestEmail(subject = "NextWAF Test E-postası") {
   const mailOptions = {
     from: `"NextWAF Test" <${process.env.SMTP_USER}>`,

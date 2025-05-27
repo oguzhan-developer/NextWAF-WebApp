@@ -941,15 +941,11 @@ app.get("/api/active-users", (req, res) => {
 
 initializeLastCheckedLogId();
 
-console.log("İlk sistem kaynakları kontrolü planlanıyor...");
-setTimeout(() => {// Ardından düzenli aralıklarla kontrol et
-
-  console.log("İlk sistem  // 1 dakikakaynakları kontrolü yapılıyor...");
+setTimeout(() => {
   checkSystemResources();
 }, 5000);
 
-// Ardından düzenli aralıklarla kontrol et
-const interval = 60 * 1000; // 1 dakika
+const interval = 60 * 1000;
 console.log(
   `Sistem kaynakları ${interval / 1000} saniyede bir kontrol edilecek`
 );

@@ -8,7 +8,7 @@ import i_cpu from '../../../assets/icons/i_cpu.svg';
 import i_logs from '../../../assets/icons/i_logs.svg';
 import i_security from '../../../assets/icons/i_security.svg';
 import i_shield from '../../../assets/icons/i_health.svg';
-import i_block from '../../../assets/icons/i_block.svg'; // Ekleyeceğiniz ikon
+import i_block from '../../../assets/icons/i_block.svg';
 import { fetchIsSystemActive, fetchIDSLogs } from '../../../utils/api';
 
 function WAFLayout() {
@@ -52,7 +52,7 @@ function WAFLayout() {
             setUsername(user.username);
         }
         
-        // Her 5 dakikada bir IDS loglarını kontrol et
+        // Her 5 dakikada bir IDS log kontrolü
         const interval = setInterval(loadIDSLogs, 5 * 60 * 1000);
         return () => clearInterval(interval);
     }, [location.pathname]);

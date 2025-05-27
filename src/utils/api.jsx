@@ -210,7 +210,6 @@ export async function fetchLogs(params = {}) { //from DB
 
         console.log(`Logs isteği - Sayfa: ${page}, Limit: ${limit}`);
 
-        // API isteğini yapıyoruz
         const response = await axios.get(`http://${dbIP}:${dbPort}/api/logs`, {
             params: {
                 page,
@@ -225,10 +224,8 @@ export async function fetchLogs(params = {}) { //from DB
             params: { search }
         });
 
-        // Toplam kayıt sayısını al
         const totalCount = totalCountResponse.data.count || 0;
 
-        // Toplam sayfa sayısını hesapla
         const totalPages = Math.ceil(totalCount / limit) || 1;
 
         console.log(`Manuel hesaplanan pagination - Toplam kayıt: ${totalCount}, Sayfa sayısı: ${totalPages}, Şu anki: ${page}`);
@@ -333,7 +330,6 @@ export async function fetchIDSLogs() {
     }
 }
 
-// E-posta bağlantısını test et
 export async function testEmailConnection() {
     try {
         const response = await axios.get(`http://${dbIP}:${dbPort}/api/test-email`);
@@ -354,7 +350,6 @@ export async function sendTestIDSMail() {
     }
 }
 
-// Profilleri getir
 export const fetchUsers = async () => {
     try {
         const response = await axios.get(`http://${dbIP}:${dbPort}/api/users`);
@@ -375,7 +370,6 @@ export const fetchProfileDetails = async (id) => {
     }
 };
 
-// Profil güncelle
 export const updateProfile = async (id, profileData) => {
     try {
         const response = await axios.put(`http://${dbIP}:${dbPort}/api/users/${id}`, profileData);
@@ -386,7 +380,6 @@ export const updateProfile = async (id, profileData) => {
     }
 };
 
-// Yeni profil oluştur
 export const createProfile = async (profileData) => {
     try {
         const response = await axios.post(`http://${dbIP}:${dbPort}/api/users`, profileData);
@@ -397,7 +390,6 @@ export const createProfile = async (profileData) => {
     }
 };
 
-// Kullanıcı sil
 export const deleteUser = async (id) => {
     try {
         const response = await axios.delete(`http://${dbIP}:${dbPort}/api/users/${id}`);
@@ -408,7 +400,6 @@ export const deleteUser = async (id) => {
     }
 };
 
-// Logout fonksiyonu
 export const logout = async (username) => {
   try {
     const response = await axios.post(`http://${dbIP}:${dbPort}/api/logout`, { username });
@@ -419,7 +410,6 @@ export const logout = async (username) => {
   }
 };
 
-// Aktif kullanıcıları getir
 export const fetchActiveUsers = async () => {
   try {
     const response = await axios.get(`http://localhost:${dbPort}/api/active-users`);
@@ -430,7 +420,6 @@ export const fetchActiveUsers = async () => {
   }
 };
 
-// IP engelleme işlemleri
 export async function fetchBlockedIPs() {
   try {
     const response = await axios.get(`http://${dbIP}:${dbPort}/api/blocked-ips`);
@@ -476,14 +465,11 @@ export async function blockAttackSource(logId) {
   }
 }
 
-// IP itibar kontrolü
 export async function checkIPReputation(ipAddress) {
   try {
-    console.log(`IP itibar kontrolü için istek yapılıyor: ${ipAddress}`);
-    // IP itibarını sunucu üzerinden kontrol et (CORS sorununu önlemek için)
     const response = await axios.get(`http://${dbIP}:${dbPort}/api/check-ip-reputation`, {
       params: { ip: ipAddress },
-      timeout: 15000 // 15 saniye timeout
+      timeout: 15000 
     });
     
     console.log("IP itibar kontrolü yanıtı alındı");

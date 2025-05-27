@@ -98,7 +98,7 @@ function Sistem() {
                 <Grid.Row>
                     <Grid.Column width={16}>
                         <Segment className="component">
-                            <Header as='h2'>Sunucu Servisleri</Header>
+                            <Header as='h2'>Sunucu Servisi</Header>
                             <Divider />
 
                             <Table celled className="server-table">

@@ -104,8 +104,7 @@ function DurumPaneli() {
         },
     };
 
-    // WAF.jsx'ten alınan yardımcı fonksiyonlar
-    const formatPercentage = (value) => {
+    const formatYuzde = (value) => {
         if (value === undefined || value === null) return '0%';
         const strValue = value.toString();
         if (strValue.endsWith('.00')) return parseInt(value, 10) + '%';
@@ -141,21 +140,7 @@ function DurumPaneli() {
         return { color: 'var(--yesil-color, #28a745)' };
     };
 
-    const generateColors = (dataPoints) => {
-        const borderColors = [];
-        const backgroundColors = [];
-
-        for (let i = 0; i < dataPoints.length; i++) {
-            const value = parseFloat(dataPoints[i]);
-            const colors = getColorByUsage(value);
-            borderColors.push(colors.border);
-            backgroundColors.push(colors.background);
-        }
-
-        return { borderColors, backgroundColors };
-    };
-
-    const prepareChartData = (dataType) => {
+    const initGrafik = (dataType) => {
         if (!statsHistory || statsHistory.length === 0) return null;
 
         const reversedData = [...statsHistory].reverse();
@@ -201,8 +186,8 @@ function DurumPaneli() {
         };
     };
 
-    const preparePieData = () => {
-        if (!latestStats) return null;
+    const initPastaGrafik = () => {
+        if (!latestStats) return null; //null dön çünkü grafik yüklenmeden önce hata veriyor.
 
         const usedDisk = parseFloat(latestStats.usingDisk);
         const totalDisk = parseFloat(latestStats.totalDisk);
@@ -275,15 +260,6 @@ function DurumPaneli() {
         });
     };
 
-    // Tarihi formatla
-    const formatSystemDate = () => {
-        return currentTime.toLocaleDateString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
-
     function getDescription(type) {
         const descriptions = {
             'Sistem Saati': 'Sunucunun sistem saatini gösterir. Loglama için önemlidir.',
@@ -316,7 +292,7 @@ function DurumPaneli() {
                                 <div className="usage-percentage">
                                     <Statistic>
                                         <Statistic.Value style={getUsageColor(latestStats.RAMYuzdesi)}>
-                                            {formatPercentage(latestStats.RAMYuzdesi)}
+                                            {formatYuzde(latestStats.RAMYuzdesi)}
                                         </Statistic.Value>
                                         <Statistic.Label>Kullanım</Statistic.Label>
                                     </Statistic>
@@ -331,10 +307,10 @@ function DurumPaneli() {
                         </div>
                         <div className="chart-container transparent-bg">
                             <div className="chart-wrapper">
-                                {prepareChartData('ram') &&
+                                {initGrafik('ram') &&
                                     <Line
                                         options={chartOptions}
-                                        data={prepareChartData('ram')}
+                                        data={initGrafik('ram')}
                                     />
                                 }
                             </div>
@@ -355,7 +331,7 @@ function DurumPaneli() {
                                 <div className="usage-percentage">
                                     <Statistic>
                                         <Statistic.Value style={getUsageColor(latestStats.CPUYuzdesi)}>
-                                            {formatPercentage(latestStats.CPUYuzdesi)}
+                                            {formatYuzde(latestStats.CPUYuzdesi)}
                                         </Statistic.Value>
                                         <Statistic.Label>Kullanım</Statistic.Label>
                                     </Statistic>
@@ -370,10 +346,10 @@ function DurumPaneli() {
                         </div>
                         <div className="chart-container transparent-bg">
                             <div className="chart-wrapper">
-                                {prepareChartData('cpu') &&
+                                {initGrafik('cpu') &&
                                     <Line
                                         options={chartOptions}
-                                        data={prepareChartData('cpu')}
+                                        data={initGrafik('cpu')}
                                     />
                                 }
                             </div>
@@ -394,7 +370,7 @@ function DurumPaneli() {
                                 <div className="usage-percentage">
                                     <Statistic>
                                         <Statistic.Value style={getUsageColor(latestStats.diskYuzdesi)}>
-                                            {formatPercentage(latestStats.diskYuzdesi)}
+                                            {formatYuzde(latestStats.diskYuzdesi)}
                                         </Statistic.Value>
                                         <Statistic.Label>Kullanım</Statistic.Label>
                                     </Statistic>
@@ -424,10 +400,10 @@ function DurumPaneli() {
                         </div>
                         <div className="chart-container transparent-bg pie-chart-container">
                             <div className="chart-wrapper">
-                                {preparePieData() &&
+                                {initPastaGrafik() &&
                                     <Pie
                                         options={pieOptions}
-                                        data={preparePieData()}
+                                        data={initPastaGrafik()}
                                     />
                                 }
                             </div>

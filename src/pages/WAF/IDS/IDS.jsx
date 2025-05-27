@@ -55,7 +55,6 @@ function IDS() {
                     type: 'success', 
                     content: `${selectedIP} adresi başarıyla engellendi.` 
                 });
-                // Logları yenile
                 loadLogs();
             } else {
                 setBlockMessage({ 
@@ -86,7 +85,6 @@ function IDS() {
                     type: 'success', 
                     content: `${ipAddress} adresi başarıyla engellendi ve log işaretlendi.` 
                 });
-                // Logları yenile
                 loadLogs();
             } else {
                 setBlockMessage({ 
@@ -106,10 +104,8 @@ function IDS() {
     };
 
     const formatDateTime = (timestamp) => {
-        // Tarih nesnesini oluştur
         const date = new Date(timestamp);
         
-        // Tarih yerel saat dilimine göre ayarlanıyor
         return new Intl.DateTimeFormat('tr-TR', {
             year: 'numeric',
             month: '2-digit',
